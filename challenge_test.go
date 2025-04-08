@@ -2,6 +2,8 @@ package pow
 
 import (
 	"crypto/sha256"
+	"hash"
+	"math/big"
 	"net/url"
 	"testing"
 	"time"
@@ -45,6 +47,69 @@ func TestChallenge_LeadingZeroCount(test *testing.T) {
 				leadingZeroCount: data.fields.leadingZeroCount,
 			}
 			got := entity.LeadingZeroCount()
+
+			assert.Equal(test, data.want, got)
+		})
+	}
+}
+
+func TestChallenge_TargetBitIndex(test *testing.T) {
+	type fields struct {
+		leadingZeroCount powValueTypes.LeadingZeroCount
+		hash             powValueTypes.Hash
+	}
+
+	for _, data := range []struct {
+		name   string
+		fields fields
+		want   int
+	}{
+		{
+			name: "success/regular leading zero count",
+			fields: fields{
+				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+					value, err := powValueTypes.NewLeadingZeroCount(23)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				hash: powValueTypes.NewHash(sha256.New()),
+			},
+			want: 233,
+		},
+		{
+			name: "success/minimal leading zero count",
+			fields: fields{
+				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+					value, err := powValueTypes.NewLeadingZeroCount(0)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				hash: powValueTypes.NewHash(sha256.New()),
+			},
+			want: 256,
+		},
+		{
+			name: "success/maximal leading zero count",
+			fields: fields{
+				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+					value, err := powValueTypes.NewLeadingZeroCount(256)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				hash: powValueTypes.NewHash(sha256.New()),
+			},
+			want: 0,
+		},
+	} {
+		test.Run(data.name, func(test *testing.T) {
+			entity := Challenge{
+				leadingZeroCount: data.fields.leadingZeroCount,
+				hash:             data.fields.hash,
+			}
+			got := entity.TargetBitIndex()
 
 			assert.Equal(test, data.want, got)
 		})
@@ -236,6 +301,105 @@ func TestChallenge_HashDataLayout(test *testing.T) {
 			got := entity.HashDataLayout()
 
 			assert.Equal(test, data.want, got)
+		})
+	}
+}
+
+func TestChallenge_Solve(test *testing.T) {
+	type fields struct {
+		leadingZeroCount powValueTypes.LeadingZeroCount
+		payload          powValueTypes.Payload
+		hash             powValueTypes.Hash
+		hashDataLayout   powValueTypes.HashDataLayout
+	}
+
+	for _, data := range []struct {
+		name    string
+		fields  fields
+		want    Solution
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "success",
+			fields: fields{
+				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+					value, err := powValueTypes.NewLeadingZeroCount(5)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				payload: powValueTypes.NewPayload("dummy"),
+				hash:    powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				),
+			},
+			want: Solution{
+				challenge: Challenge{
+					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+						value, err := powValueTypes.NewLeadingZeroCount(5)
+						require.NoError(test, err)
+
+						return value
+					}(),
+					payload: powValueTypes.NewPayload("dummy"),
+					hash: powValueTypes.NewHash(func() hash.Hash {
+						hash := sha256.New()
+						hash.Write([]byte("5:dummy:37"))
+
+						return hash
+					}()),
+					hashDataLayout: powValueTypes.MustParseHashDataLayout(
+						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+							":{{ .Challenge.Payload.ToString }}" +
+							":{{ .Nonce.ToString }}",
+					),
+				},
+				nonce: func() powValueTypes.Nonce {
+					value, err := powValueTypes.NewNonce(big.NewInt(37))
+					require.NoError(test, err)
+
+					return value
+				}(),
+				hashSum: powValueTypes.NewHashSum([]byte{
+					0x00, 0x5d, 0x37, 0x2c, 0x56, 0xe6, 0xc6, 0xb5,
+					0x2a, 0xd4, 0xa8, 0x32, 0x56, 0x54, 0x69, 0x2e,
+					0xc9, 0xaa, 0x3a, 0xf5, 0xf7, 0x30, 0x21, 0x74,
+					0x8b, 0xc3, 0xfd, 0xb1, 0x24, 0xae, 0x9b, 0x20,
+				}),
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "error/unable to execute the hash data layout",
+			fields: fields{
+				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+					value, err := powValueTypes.NewLeadingZeroCount(5)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				payload:        powValueTypes.NewPayload("dummy"),
+				hash:           powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
+			},
+			want:    Solution{},
+			wantErr: assert.Error,
+		},
+	} {
+		test.Run(data.name, func(test *testing.T) {
+			entity := Challenge{
+				leadingZeroCount: data.fields.leadingZeroCount,
+				payload:          data.fields.payload,
+				hash:             data.fields.hash,
+				hashDataLayout:   data.fields.hashDataLayout,
+			}
+			got, err := entity.Solve()
+
+			assert.Equal(test, data.want, got)
+			data.wantErr(test, err)
 		})
 	}
 }
