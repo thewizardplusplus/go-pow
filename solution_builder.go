@@ -10,6 +10,7 @@ import (
 type SolutionBuilder struct {
 	challenge mo.Option[Challenge]
 	nonce     mo.Option[powValueTypes.Nonce]
+	hashSum   mo.Option[powValueTypes.HashSum]
 }
 
 func NewSolutionBuilder() *SolutionBuilder {
@@ -28,17 +29,34 @@ func (builder *SolutionBuilder) SetNonce(
 	return builder
 }
 
+func (builder *SolutionBuilder) SetHashSum(
+	value powValueTypes.HashSum,
+) *SolutionBuilder {
+	builder.hashSum = mo.Some(value)
+	return builder
+}
+
 func (builder SolutionBuilder) Build() (Solution, error) {
 	var errs []error
 
-	challenge, isPresent := builder.challenge.Get()
-	if !isPresent {
+	challenge, isChallengePresent := builder.challenge.Get()
+	if !isChallengePresent {
 		errs = append(errs, errors.New("challenge is required"))
 	}
 
 	nonce, isPresent := builder.nonce.Get()
 	if !isPresent {
 		errs = append(errs, errors.New("nonce is required"))
+	}
+
+	hashSum, isPresent := builder.hashSum.Get()
+	if !isPresent {
+		errs = append(errs, errors.New("hash sum is required"))
+	} else if isChallengePresent && hashSum.Len() != challenge.hash.SizeInBytes() {
+		errs = append(
+			errs,
+			errors.New("hash sum length doesn't match the hash checksum size"),
+		)
 	}
 
 	if len(errs) > 0 {
@@ -48,6 +66,7 @@ func (builder SolutionBuilder) Build() (Solution, error) {
 	entity := Solution{
 		challenge: challenge,
 		nonce:     nonce,
+		hashSum:   hashSum,
 	}
 	return entity, nil
 }

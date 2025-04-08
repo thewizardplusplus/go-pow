@@ -33,10 +33,10 @@ func (value Hash) SizeInBits() int {
 	return value.rawValue.Size() * bitsPerByte
 }
 
-func (value Hash) ApplyTo(data string) []byte {
+func (value Hash) ApplyTo(data string) HashSum {
 	value.rawValue.Reset()
 	value.rawValue.Write([]byte(data))
-	return value.rawValue.Sum(nil)
+	return NewHashSum(value.rawValue.Sum(nil))
 }
 
 func (value Hash) ToHash() hash.Hash {
