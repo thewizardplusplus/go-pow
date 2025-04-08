@@ -1,6 +1,7 @@
 package pow
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"math/big"
 	"testing"
@@ -40,7 +41,8 @@ func TestSolutionBuilder_Build(test *testing.T) {
 					require.NoError(test, err)
 
 					return value
-				}()),
+				}()).
+				SetHashSum(powValueTypes.NewHashSum(bytes.Repeat([]byte("0"), 32))),
 			want: Solution{
 				challenge: Challenge{
 					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
@@ -63,12 +65,41 @@ func TestSolutionBuilder_Build(test *testing.T) {
 
 					return value
 				}(),
+				hashSum: powValueTypes.NewHashSum(bytes.Repeat([]byte("0"), 32)),
 			},
 			wantErr: assert.NoError,
 		},
 		{
-			name:    "error",
+			name:    "error/without parameters",
 			builder: NewSolutionBuilder(),
+			want:    Solution{},
+			wantErr: assert.Error,
+		},
+		{
+			name: "error/invalid hash sum length",
+			builder: NewSolutionBuilder().
+				SetChallenge(Challenge{
+					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+						value, err := powValueTypes.NewLeadingZeroCount(23)
+						require.NoError(test, err)
+
+						return value
+					}(),
+					payload: powValueTypes.NewPayload("dummy"),
+					hash:    powValueTypes.NewHash(sha256.New()),
+					hashDataLayout: powValueTypes.MustParseHashDataLayout(
+						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+							":{{ .Challenge.Payload.ToString }}" +
+							":{{ .Nonce.ToString }}",
+					),
+				}).
+				SetNonce(func() powValueTypes.Nonce {
+					value, err := powValueTypes.NewNonce(big.NewInt(23))
+					require.NoError(test, err)
+
+					return value
+				}()).
+				SetHashSum(powValueTypes.NewHashSum([]byte("dummy"))),
 			want:    Solution{},
 			wantErr: assert.Error,
 		},
