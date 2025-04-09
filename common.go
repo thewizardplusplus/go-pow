@@ -6,9 +6,9 @@ import (
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
 )
 
-func makeTarget(targetBitIndex int) *big.Int {
+func makeTarget(targetBitIndex powValueTypes.TargetBitIndex) *big.Int {
 	target := big.NewInt(0)
-	target.SetBit(target, targetBitIndex, 1)
+	target.SetBit(target, targetBitIndex.ToInt(), 1)
 
 	return target
 }

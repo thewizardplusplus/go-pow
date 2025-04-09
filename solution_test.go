@@ -181,6 +181,39 @@ func TestSolution_Verify(test *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
+			name: "error/unable to get the target bit index",
+			fields: fields{
+				challenge: Challenge{
+					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+						value, err := powValueTypes.NewLeadingZeroCount(1000)
+						require.NoError(test, err)
+
+						return value
+					}(),
+					payload: powValueTypes.NewPayload("dummy"),
+					hash:    powValueTypes.NewHash(sha256.New()),
+					hashDataLayout: powValueTypes.MustParseHashDataLayout(
+						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+							":{{ .Challenge.Payload.ToString }}" +
+							":{{ .Nonce.ToString }}",
+					),
+				},
+				nonce: func() powValueTypes.Nonce {
+					value, err := powValueTypes.NewNonce(big.NewInt(37))
+					require.NoError(test, err)
+
+					return value
+				}(),
+				hashSum: powValueTypes.NewHashSum([]byte{
+					0x00, 0x5d, 0x37, 0x2c, 0x56, 0xe6, 0xc6, 0xb5,
+					0x2a, 0xd4, 0xa8, 0x32, 0x56, 0x54, 0x69, 0x2e,
+					0xc9, 0xaa, 0x3a, 0xf5, 0xf7, 0x30, 0x21, 0x74,
+					0x8b, 0xc3, 0xfd, 0xb1, 0x24, 0xae, 0x9b, 0x20,
+				}),
+			},
+			wantErr: assert.Error,
+		},
+		{
 			name: "error/unable to execute the hash data layout",
 			fields: fields{
 				challenge: Challenge{

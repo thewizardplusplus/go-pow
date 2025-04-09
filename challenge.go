@@ -9,7 +9,7 @@ import (
 
 type ChallengeHashData struct {
 	Challenge      Challenge
-	TargetBitIndex int
+	TargetBitIndex powValueTypes.TargetBitIndex
 	Nonce          powValueTypes.Nonce
 }
 
@@ -26,8 +26,18 @@ func (entity Challenge) LeadingZeroCount() powValueTypes.LeadingZeroCount {
 	return entity.leadingZeroCount
 }
 
-func (entity Challenge) TargetBitIndex() int {
-	return entity.hash.SizeInBits() - entity.leadingZeroCount.ToInt()
+func (entity Challenge) TargetBitIndex() (powValueTypes.TargetBitIndex, error) {
+	rawValue := entity.hash.SizeInBits() - entity.leadingZeroCount.ToInt()
+
+	value, err := powValueTypes.NewTargetBitIndex(rawValue)
+	if err != nil {
+		return powValueTypes.TargetBitIndex{}, fmt.Errorf(
+			"unable to construct the target bit index: %w",
+			err,
+		)
+	}
+
+	return value, nil
 }
 
 func (entity Challenge) CreatedAt() mo.Option[powValueTypes.CreatedAt] {
@@ -51,7 +61,11 @@ func (entity Challenge) HashDataLayout() powValueTypes.HashDataLayout {
 }
 
 func (entity Challenge) Solve() (Solution, error) {
-	targetBitIndex := entity.TargetBitIndex()
+	targetBitIndex, err := entity.TargetBitIndex()
+	if err != nil {
+		return Solution{}, fmt.Errorf("unable to get the target bit index: %w", err)
+	}
+
 	target := makeTarget(targetBitIndex)
 
 	nonce, err := powValueTypes.NewZeroNonce()
