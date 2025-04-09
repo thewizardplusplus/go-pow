@@ -79,10 +79,45 @@ func TestChallengeBuilder_Build(test *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name: "success/required parameters only",
+			name: "success/required parameters only/leading zero count is specified",
 			builder: NewChallengeBuilder().
 				SetLeadingZeroCount(func() powValueTypes.LeadingZeroCount {
 					value, err := powValueTypes.NewLeadingZeroCount(23)
+					require.NoError(test, err)
+
+					return value
+				}()).
+				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetHash(powValueTypes.NewHash(sha256.New())).
+				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				)),
+			want: Challenge{
+				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+					value, err := powValueTypes.NewLeadingZeroCount(23)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				createdAt: mo.None[powValueTypes.CreatedAt](),
+				resource:  mo.None[powValueTypes.Resource](),
+				payload:   powValueTypes.NewPayload("dummy"),
+				hash:      powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				),
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "success/required parameters only/target bit index is specified",
+			builder: NewChallengeBuilder().
+				SetTargetBitIndex(func() powValueTypes.TargetBitIndex {
+					value, err := powValueTypes.NewTargetBitIndex(233)
 					require.NoError(test, err)
 
 					return value
@@ -120,10 +155,55 @@ func TestChallengeBuilder_Build(test *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
+			name: "error/" +
+				"leading zero count and target bit index are specified at the same time",
+			builder: NewChallengeBuilder().
+				SetLeadingZeroCount(func() powValueTypes.LeadingZeroCount {
+					value, err := powValueTypes.NewLeadingZeroCount(23)
+					require.NoError(test, err)
+
+					return value
+				}()).
+				SetTargetBitIndex(func() powValueTypes.TargetBitIndex {
+					value, err := powValueTypes.NewTargetBitIndex(233)
+					require.NoError(test, err)
+
+					return value
+				}()).
+				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetHash(powValueTypes.NewHash(sha256.New())).
+				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				)),
+			want:    Challenge{},
+			wantErr: assert.Error,
+		},
+		{
 			name: "error/leading zero count is too large",
 			builder: NewChallengeBuilder().
 				SetLeadingZeroCount(func() powValueTypes.LeadingZeroCount {
 					value, err := powValueTypes.NewLeadingZeroCount(1000)
+					require.NoError(test, err)
+
+					return value
+				}()).
+				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetHash(powValueTypes.NewHash(sha256.New())).
+				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				)),
+			want:    Challenge{},
+			wantErr: assert.Error,
+		},
+		{
+			name: "error/target bit index is too large",
+			builder: NewChallengeBuilder().
+				SetTargetBitIndex(func() powValueTypes.TargetBitIndex {
+					value, err := powValueTypes.NewTargetBitIndex(1000)
 					require.NoError(test, err)
 
 					return value
