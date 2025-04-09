@@ -27,7 +27,10 @@ func (entity Solution) HashSum() powValueTypes.HashSum {
 }
 
 func (entity Solution) Verify() error {
-	targetBitIndex := entity.challenge.TargetBitIndex()
+	targetBitIndex, err := entity.challenge.TargetBitIndex()
+	if err != nil {
+		return fmt.Errorf("unable to get the target bit index: %w", err)
+	}
 
 	hashData, err := entity.challenge.hashDataLayout.Execute(ChallengeHashData{
 		Challenge:      entity.challenge,
