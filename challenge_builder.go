@@ -2,6 +2,7 @@ package pow
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/samber/mo"
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
@@ -9,6 +10,7 @@ import (
 
 type ChallengeBuilder struct {
 	leadingZeroCount mo.Option[powValueTypes.LeadingZeroCount]
+	targetBitIndex   mo.Option[powValueTypes.TargetBitIndex]
 	createdAt        mo.Option[powValueTypes.CreatedAt]
 	resource         mo.Option[powValueTypes.Resource]
 	payload          mo.Option[powValueTypes.Payload]
@@ -24,6 +26,13 @@ func (builder *ChallengeBuilder) SetLeadingZeroCount(
 	value powValueTypes.LeadingZeroCount,
 ) *ChallengeBuilder {
 	builder.leadingZeroCount = mo.Some(value)
+	return builder
+}
+
+func (builder *ChallengeBuilder) SetTargetBitIndex(
+	value powValueTypes.TargetBitIndex,
+) *ChallengeBuilder {
+	builder.targetBitIndex = mo.Some(value)
 	return builder
 }
 
@@ -66,8 +75,19 @@ func (builder ChallengeBuilder) Build() (Challenge, error) {
 	var errs []error
 
 	leadingZeroCount, isLeadingZeroCountPresent := builder.leadingZeroCount.Get()
-	if !isLeadingZeroCountPresent {
-		errs = append(errs, errors.New("leading zero count is required"))
+	targetBitIndex, isTargetBitIndexPresent := builder.targetBitIndex.Get()
+	if !isLeadingZeroCountPresent && !isTargetBitIndexPresent {
+		errs = append(
+			errs,
+			errors.New("leading zero count or target bit index is required"),
+		)
+	} else if isLeadingZeroCountPresent && isTargetBitIndexPresent {
+		errs = append(
+			errs,
+			errors.New(
+				"leading zero count and target bit index are specified at the same time",
+			),
+		)
 	}
 
 	payload, isPresent := builder.payload.Get()
@@ -84,6 +104,17 @@ func (builder ChallengeBuilder) Build() (Challenge, error) {
 			errs,
 			errors.New("leading zero count exceeds the hash checksum size"),
 		)
+	} else if isTargetBitIndexPresent {
+		rawLeadingZeroCount := hash.SizeInBits() - targetBitIndex.ToInt()
+
+		var err error
+		leadingZeroCount, err = powValueTypes.NewLeadingZeroCount(rawLeadingZeroCount)
+		if err != nil {
+			errs = append(
+				errs,
+				fmt.Errorf("unable to construct the leading zero count: %w", err),
+			)
+		}
 	}
 
 	hashDataLayout, isPresent := builder.hashDataLayout.Get()
