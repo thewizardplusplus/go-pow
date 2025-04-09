@@ -60,9 +60,10 @@ func TestChallenge_TargetBitIndex(test *testing.T) {
 	}
 
 	for _, data := range []struct {
-		name   string
-		fields fields
-		want   int
+		name    string
+		fields  fields
+		want    powValueTypes.TargetBitIndex
+		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name: "success/regular leading zero count",
@@ -75,7 +76,13 @@ func TestChallenge_TargetBitIndex(test *testing.T) {
 				}(),
 				hash: powValueTypes.NewHash(sha256.New()),
 			},
-			want: 233,
+			want: func() powValueTypes.TargetBitIndex {
+				value, err := powValueTypes.NewTargetBitIndex(233)
+				require.NoError(test, err)
+
+				return value
+			}(),
+			wantErr: assert.NoError,
 		},
 		{
 			name: "success/minimal leading zero count",
@@ -88,7 +95,13 @@ func TestChallenge_TargetBitIndex(test *testing.T) {
 				}(),
 				hash: powValueTypes.NewHash(sha256.New()),
 			},
-			want: 256,
+			want: func() powValueTypes.TargetBitIndex {
+				value, err := powValueTypes.NewTargetBitIndex(256)
+				require.NoError(test, err)
+
+				return value
+			}(),
+			wantErr: assert.NoError,
 		},
 		{
 			name: "success/maximal leading zero count",
@@ -101,7 +114,27 @@ func TestChallenge_TargetBitIndex(test *testing.T) {
 				}(),
 				hash: powValueTypes.NewHash(sha256.New()),
 			},
-			want: 0,
+			want: func() powValueTypes.TargetBitIndex {
+				value, err := powValueTypes.NewTargetBitIndex(0)
+				require.NoError(test, err)
+
+				return value
+			}(),
+			wantErr: assert.NoError,
+		},
+		{
+			name: "error",
+			fields: fields{
+				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+					value, err := powValueTypes.NewLeadingZeroCount(1000)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				hash: powValueTypes.NewHash(sha256.New()),
+			},
+			want:    powValueTypes.TargetBitIndex{},
+			wantErr: assert.Error,
 		},
 	} {
 		test.Run(data.name, func(test *testing.T) {
@@ -109,9 +142,10 @@ func TestChallenge_TargetBitIndex(test *testing.T) {
 				leadingZeroCount: data.fields.leadingZeroCount,
 				hash:             data.fields.hash,
 			}
-			got := entity.TargetBitIndex()
+			got, err := entity.TargetBitIndex()
 
 			assert.Equal(test, data.want, got)
+			data.wantErr(test, err)
 		})
 	}
 }
@@ -371,6 +405,26 @@ func TestChallenge_Solve(test *testing.T) {
 				}),
 			},
 			wantErr: assert.NoError,
+		},
+		{
+			name: "error/unable to get the target bit index",
+			fields: fields{
+				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
+					value, err := powValueTypes.NewLeadingZeroCount(1000)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				payload: powValueTypes.NewPayload("dummy"),
+				hash:    powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				),
+			},
+			want:    Solution{},
+			wantErr: assert.Error,
 		},
 		{
 			name: "error/unable to execute the hash data layout",
