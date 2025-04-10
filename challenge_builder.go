@@ -13,7 +13,7 @@ type ChallengeBuilder struct {
 	targetBitIndex      mo.Option[powValueTypes.TargetBitIndex]
 	createdAt           mo.Option[powValueTypes.CreatedAt]
 	resource            mo.Option[powValueTypes.Resource]
-	payload             mo.Option[powValueTypes.Payload]
+	serializedPayload   mo.Option[powValueTypes.SerializedPayload]
 	hash                mo.Option[powValueTypes.Hash]
 	hashDataLayout      mo.Option[powValueTypes.HashDataLayout]
 }
@@ -50,10 +50,10 @@ func (builder *ChallengeBuilder) SetResource(
 	return builder
 }
 
-func (builder *ChallengeBuilder) SetPayload(
-	value powValueTypes.Payload,
+func (builder *ChallengeBuilder) SetSerializedPayload(
+	value powValueTypes.SerializedPayload,
 ) *ChallengeBuilder {
-	builder.payload = mo.Some(value)
+	builder.serializedPayload = mo.Some(value)
 	return builder
 }
 
@@ -92,9 +92,9 @@ func (builder ChallengeBuilder) Build() (Challenge, error) {
 		)
 	}
 
-	payload, isPresent := builder.payload.Get()
+	serializedPayload, isPresent := builder.serializedPayload.Get()
 	if !isPresent {
-		errs = append(errs, errors.New("payload is required"))
+		errs = append(errs, errors.New("serialized payload is required"))
 	}
 
 	hash, isPresent := builder.hash.Get()
@@ -134,7 +134,7 @@ func (builder ChallengeBuilder) Build() (Challenge, error) {
 		leadingZeroBitCount: leadingZeroBitCount,
 		createdAt:           builder.createdAt,
 		resource:            builder.resource,
-		payload:             payload,
+		serializedPayload:   serializedPayload,
 		hash:                hash,
 		hashDataLayout:      hashDataLayout,
 	}
