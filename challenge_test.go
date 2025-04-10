@@ -14,28 +14,28 @@ import (
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
 )
 
-func TestChallenge_LeadingZeroCount(test *testing.T) {
+func TestChallenge_LeadingZeroBitCount(test *testing.T) {
 	type fields struct {
-		leadingZeroCount powValueTypes.LeadingZeroCount
+		leadingZeroBitCount powValueTypes.LeadingZeroBitCount
 	}
 
 	for _, data := range []struct {
 		name   string
 		fields fields
-		want   powValueTypes.LeadingZeroCount
+		want   powValueTypes.LeadingZeroBitCount
 	}{
 		{
 			name: "success",
 			fields: fields{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(23)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
 					require.NoError(test, err)
 
 					return value
 				}(),
 			},
-			want: func() powValueTypes.LeadingZeroCount {
-				value, err := powValueTypes.NewLeadingZeroCount(23)
+			want: func() powValueTypes.LeadingZeroBitCount {
+				value, err := powValueTypes.NewLeadingZeroBitCount(23)
 				require.NoError(test, err)
 
 				return value
@@ -44,9 +44,9 @@ func TestChallenge_LeadingZeroCount(test *testing.T) {
 	} {
 		test.Run(data.name, func(test *testing.T) {
 			entity := Challenge{
-				leadingZeroCount: data.fields.leadingZeroCount,
+				leadingZeroBitCount: data.fields.leadingZeroBitCount,
 			}
-			got := entity.LeadingZeroCount()
+			got := entity.LeadingZeroBitCount()
 
 			assert.Equal(test, data.want, got)
 		})
@@ -55,8 +55,8 @@ func TestChallenge_LeadingZeroCount(test *testing.T) {
 
 func TestChallenge_TargetBitIndex(test *testing.T) {
 	type fields struct {
-		leadingZeroCount powValueTypes.LeadingZeroCount
-		hash             powValueTypes.Hash
+		leadingZeroBitCount powValueTypes.LeadingZeroBitCount
+		hash                powValueTypes.Hash
 	}
 
 	for _, data := range []struct {
@@ -66,10 +66,10 @@ func TestChallenge_TargetBitIndex(test *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
-			name: "success/regular leading zero count",
+			name: "success/regular leading zero bit count",
 			fields: fields{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(23)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
 					require.NoError(test, err)
 
 					return value
@@ -85,10 +85,10 @@ func TestChallenge_TargetBitIndex(test *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name: "success/minimal leading zero count",
+			name: "success/minimal leading zero bit count",
 			fields: fields{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(0)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(0)
 					require.NoError(test, err)
 
 					return value
@@ -104,10 +104,10 @@ func TestChallenge_TargetBitIndex(test *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name: "success/maximal leading zero count",
+			name: "success/maximal leading zero bit count",
 			fields: fields{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(256)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(256)
 					require.NoError(test, err)
 
 					return value
@@ -125,8 +125,8 @@ func TestChallenge_TargetBitIndex(test *testing.T) {
 		{
 			name: "error",
 			fields: fields{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(1000)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(1000)
 					require.NoError(test, err)
 
 					return value
@@ -139,8 +139,8 @@ func TestChallenge_TargetBitIndex(test *testing.T) {
 	} {
 		test.Run(data.name, func(test *testing.T) {
 			entity := Challenge{
-				leadingZeroCount: data.fields.leadingZeroCount,
-				hash:             data.fields.hash,
+				leadingZeroBitCount: data.fields.leadingZeroBitCount,
+				hash:                data.fields.hash,
 			}
 			got, err := entity.TargetBitIndex()
 
@@ -333,10 +333,10 @@ func TestChallenge_HashDataLayout(test *testing.T) {
 
 func TestChallenge_Solve(test *testing.T) {
 	type fields struct {
-		leadingZeroCount powValueTypes.LeadingZeroCount
-		payload          powValueTypes.Payload
-		hash             powValueTypes.Hash
-		hashDataLayout   powValueTypes.HashDataLayout
+		leadingZeroBitCount powValueTypes.LeadingZeroBitCount
+		payload             powValueTypes.Payload
+		hash                powValueTypes.Hash
+		hashDataLayout      powValueTypes.HashDataLayout
 	}
 
 	for _, data := range []struct {
@@ -348,8 +348,8 @@ func TestChallenge_Solve(test *testing.T) {
 		{
 			name: "success",
 			fields: fields{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(5)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(5)
 					require.NoError(test, err)
 
 					return value
@@ -357,15 +357,15 @@ func TestChallenge_Solve(test *testing.T) {
 				payload: powValueTypes.NewPayload("dummy"),
 				hash:    powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
 			},
 			want: Solution{
 				challenge: Challenge{
-					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-						value, err := powValueTypes.NewLeadingZeroCount(5)
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(5)
 						require.NoError(test, err)
 
 						return value
@@ -378,7 +378,7 @@ func TestChallenge_Solve(test *testing.T) {
 						return hash
 					}()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
-						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 							":{{ .Challenge.Payload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
@@ -401,8 +401,8 @@ func TestChallenge_Solve(test *testing.T) {
 		{
 			name: "error/unable to get the target bit index",
 			fields: fields{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(1000)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(1000)
 					require.NoError(test, err)
 
 					return value
@@ -410,7 +410,7 @@ func TestChallenge_Solve(test *testing.T) {
 				payload: powValueTypes.NewPayload("dummy"),
 				hash:    powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
@@ -421,8 +421,8 @@ func TestChallenge_Solve(test *testing.T) {
 		{
 			name: "error/unable to execute the hash data layout",
 			fields: fields{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(5)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(5)
 					require.NoError(test, err)
 
 					return value
@@ -437,10 +437,10 @@ func TestChallenge_Solve(test *testing.T) {
 	} {
 		test.Run(data.name, func(test *testing.T) {
 			entity := Challenge{
-				leadingZeroCount: data.fields.leadingZeroCount,
-				payload:          data.fields.payload,
-				hash:             data.fields.hash,
-				hashDataLayout:   data.fields.hashDataLayout,
+				leadingZeroBitCount: data.fields.leadingZeroBitCount,
+				payload:             data.fields.payload,
+				hash:                data.fields.hash,
+				hashDataLayout:      data.fields.hashDataLayout,
 			}
 			got, err := entity.Solve()
 
