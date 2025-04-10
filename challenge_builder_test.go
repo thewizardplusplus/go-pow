@@ -36,6 +36,12 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
+				SetTTL(func() powValueTypes.TTL {
+					value, err := powValueTypes.NewTTL(5*time.Minute + 23*time.Second)
+					require.NoError(test, err)
+
+					return value
+				}()).
 				SetResource(powValueTypes.NewResource(&url.URL{
 					Scheme: "https",
 					Host:   "example.com",
@@ -59,6 +65,12 @@ func TestChallengeBuilder_Build(test *testing.T) {
 					value, err := powValueTypes.NewCreatedAt(
 						time.Date(2000, time.January, 2, 3, 4, 5, 6, time.UTC),
 					)
+					require.NoError(test, err)
+
+					return mo.Some(value)
+				}(),
+				ttl: func() mo.Option[powValueTypes.TTL] {
+					value, err := powValueTypes.NewTTL(5*time.Minute + 23*time.Second)
 					require.NoError(test, err)
 
 					return mo.Some(value)
@@ -171,6 +183,74 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
+				SetHash(powValueTypes.NewHash(sha256.New())).
+				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				)),
+			want:    Challenge{},
+			wantErr: assert.Error,
+		},
+		{
+			name: "error/" +
+				"`CreatedAt` timestamp and TTL " +
+				"should either both be specified or both omitted/" +
+				"`CreatedAt` timestamp is specified",
+			builder: NewChallengeBuilder().
+				SetLeadingZeroBitCount(func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
+					require.NoError(test, err)
+
+					return value
+				}()).
+				SetCreatedAt(func() powValueTypes.CreatedAt {
+					value, err := powValueTypes.NewCreatedAt(
+						time.Date(2000, time.January, 2, 3, 4, 5, 6, time.UTC),
+					)
+					require.NoError(test, err)
+
+					return value
+				}()).
+				SetResource(powValueTypes.NewResource(&url.URL{
+					Scheme: "https",
+					Host:   "example.com",
+					Path:   "/",
+				})).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
+				SetHash(powValueTypes.NewHash(sha256.New())).
+				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				)),
+			want:    Challenge{},
+			wantErr: assert.Error,
+		},
+		{
+			name: "error/" +
+				"`CreatedAt` timestamp and TTL " +
+				"should either both be specified or both omitted/" +
+				"TTL is specified",
+			builder: NewChallengeBuilder().
+				SetLeadingZeroBitCount(func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
+					require.NoError(test, err)
+
+					return value
+				}()).
+				SetTTL(func() powValueTypes.TTL {
+					value, err := powValueTypes.NewTTL(5*time.Minute + 23*time.Second)
+					require.NoError(test, err)
+
+					return value
+				}()).
+				SetResource(powValueTypes.NewResource(&url.URL{
+					Scheme: "https",
+					Host:   "example.com",
+					Path:   "/",
+				})).
 				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(

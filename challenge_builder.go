@@ -12,6 +12,7 @@ type ChallengeBuilder struct {
 	leadingZeroBitCount mo.Option[powValueTypes.LeadingZeroBitCount]
 	targetBitIndex      mo.Option[powValueTypes.TargetBitIndex]
 	createdAt           mo.Option[powValueTypes.CreatedAt]
+	ttl                 mo.Option[powValueTypes.TTL]
 	resource            mo.Option[powValueTypes.Resource]
 	serializedPayload   mo.Option[powValueTypes.SerializedPayload]
 	hash                mo.Option[powValueTypes.Hash]
@@ -40,6 +41,13 @@ func (builder *ChallengeBuilder) SetCreatedAt(
 	value powValueTypes.CreatedAt,
 ) *ChallengeBuilder {
 	builder.createdAt = mo.Some(value)
+	return builder
+}
+
+func (builder *ChallengeBuilder) SetTTL(
+	value powValueTypes.TTL,
+) *ChallengeBuilder {
+	builder.ttl = mo.Some(value)
 	return builder
 }
 
@@ -92,6 +100,16 @@ func (builder ChallengeBuilder) Build() (Challenge, error) {
 		)
 	}
 
+	if builder.createdAt.IsPresent() != builder.ttl.IsPresent() {
+		errs = append(
+			errs,
+			errors.New(
+				"`CreatedAt` timestamp and TTL "+
+					"should either both be specified or both omitted",
+			),
+		)
+	}
+
 	serializedPayload, isPresent := builder.serializedPayload.Get()
 	if !isPresent {
 		errs = append(errs, errors.New("serialized payload is required"))
@@ -133,6 +151,7 @@ func (builder ChallengeBuilder) Build() (Challenge, error) {
 	entity := Challenge{
 		leadingZeroBitCount: leadingZeroBitCount,
 		createdAt:           builder.createdAt,
+		ttl:                 builder.ttl,
 		resource:            builder.resource,
 		serializedPayload:   serializedPayload,
 		hash:                hash,
