@@ -17,7 +17,7 @@ type Challenge struct {
 	leadingZeroBitCount powValueTypes.LeadingZeroBitCount
 	createdAt           mo.Option[powValueTypes.CreatedAt]
 	resource            mo.Option[powValueTypes.Resource]
-	payload             powValueTypes.Payload
+	serializedPayload   powValueTypes.SerializedPayload
 	hash                powValueTypes.Hash
 	hashDataLayout      powValueTypes.HashDataLayout
 }
@@ -48,8 +48,8 @@ func (entity Challenge) Resource() mo.Option[powValueTypes.Resource] {
 	return entity.resource
 }
 
-func (entity Challenge) Payload() powValueTypes.Payload {
-	return entity.payload
+func (entity Challenge) SerializedPayload() powValueTypes.SerializedPayload {
+	return entity.serializedPayload
 }
 
 func (entity Challenge) Hash() powValueTypes.Hash {

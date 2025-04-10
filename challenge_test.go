@@ -244,29 +244,29 @@ func TestChallenge_Resource(test *testing.T) {
 	}
 }
 
-func TestChallenge_Payload(test *testing.T) {
+func TestChallenge_SerializedPayload(test *testing.T) {
 	type fields struct {
-		payload powValueTypes.Payload
+		serializedPayload powValueTypes.SerializedPayload
 	}
 
 	for _, data := range []struct {
 		name   string
 		fields fields
-		want   powValueTypes.Payload
+		want   powValueTypes.SerializedPayload
 	}{
 		{
 			name: "success",
 			fields: fields{
-				payload: powValueTypes.NewPayload("dummy"),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
 			},
-			want: powValueTypes.NewPayload("dummy"),
+			want: powValueTypes.NewSerializedPayload("dummy"),
 		},
 	} {
 		test.Run(data.name, func(test *testing.T) {
 			entity := Challenge{
-				payload: data.fields.payload,
+				serializedPayload: data.fields.serializedPayload,
 			}
-			got := entity.Payload()
+			got := entity.SerializedPayload()
 
 			assert.Equal(test, data.want, got)
 		})
@@ -317,13 +317,13 @@ func TestChallenge_HashDataLayout(test *testing.T) {
 			fields: fields{
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
 			},
 			want: powValueTypes.MustParseHashDataLayout(
 				"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-					":{{ .Challenge.Payload.ToString }}" +
+					":{{ .Challenge.SerializedPayload.ToString }}" +
 					":{{ .Nonce.ToString }}",
 			),
 		},
@@ -342,7 +342,7 @@ func TestChallenge_HashDataLayout(test *testing.T) {
 func TestChallenge_Solve(test *testing.T) {
 	type fields struct {
 		leadingZeroBitCount powValueTypes.LeadingZeroBitCount
-		payload             powValueTypes.Payload
+		serializedPayload   powValueTypes.SerializedPayload
 		hash                powValueTypes.Hash
 		hashDataLayout      powValueTypes.HashDataLayout
 	}
@@ -362,11 +362,11 @@ func TestChallenge_Solve(test *testing.T) {
 
 					return value
 				}(),
-				payload: powValueTypes.NewPayload("dummy"),
-				hash:    powValueTypes.NewHash(sha256.New()),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
 			},
@@ -378,7 +378,7 @@ func TestChallenge_Solve(test *testing.T) {
 
 						return value
 					}(),
-					payload: powValueTypes.NewPayload("dummy"),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
 					hash: powValueTypes.NewHash(func() hash.Hash {
 						hash := sha256.New()
 						hash.Write([]byte("5:dummy:37"))
@@ -387,7 +387,7 @@ func TestChallenge_Solve(test *testing.T) {
 					}()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
 						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-							":{{ .Challenge.Payload.ToString }}" +
+							":{{ .Challenge.SerializedPayload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
 				},
@@ -415,11 +415,11 @@ func TestChallenge_Solve(test *testing.T) {
 
 					return value
 				}(),
-				payload: powValueTypes.NewPayload("dummy"),
-				hash:    powValueTypes.NewHash(sha256.New()),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
 			},
@@ -435,9 +435,11 @@ func TestChallenge_Solve(test *testing.T) {
 
 					return value
 				}(),
-				payload:        powValueTypes.NewPayload("dummy"),
-				hash:           powValueTypes.NewHash(sha256.New()),
-				hashDataLayout: powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"dummy {{ .Dummy }}",
+				),
 			},
 			want:    Solution{},
 			wantErr: assert.Error,
@@ -446,7 +448,7 @@ func TestChallenge_Solve(test *testing.T) {
 		test.Run(data.name, func(test *testing.T) {
 			entity := Challenge{
 				leadingZeroBitCount: data.fields.leadingZeroBitCount,
-				payload:             data.fields.payload,
+				serializedPayload:   data.fields.serializedPayload,
 				hash:                data.fields.hash,
 				hashDataLayout:      data.fields.hashDataLayout,
 			}

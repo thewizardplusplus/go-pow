@@ -41,11 +41,11 @@ func TestChallengeBuilder_Build(test *testing.T) {
 					Host:   "example.com",
 					Path:   "/",
 				})).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
 			want: Challenge{
@@ -68,11 +68,11 @@ func TestChallengeBuilder_Build(test *testing.T) {
 					Host:   "example.com",
 					Path:   "/",
 				})),
-				payload: powValueTypes.NewPayload("dummy"),
-				hash:    powValueTypes.NewHash(sha256.New()),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
 			},
@@ -87,11 +87,11 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
 			want: Challenge{
@@ -101,13 +101,13 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}(),
-				createdAt: mo.None[powValueTypes.CreatedAt](),
-				resource:  mo.None[powValueTypes.Resource](),
-				payload:   powValueTypes.NewPayload("dummy"),
-				hash:      powValueTypes.NewHash(sha256.New()),
+				createdAt:         mo.None[powValueTypes.CreatedAt](),
+				resource:          mo.None[powValueTypes.Resource](),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
 			},
@@ -122,11 +122,11 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
 			want: Challenge{
@@ -136,13 +136,13 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}(),
-				createdAt: mo.None[powValueTypes.CreatedAt](),
-				resource:  mo.None[powValueTypes.Resource](),
-				payload:   powValueTypes.NewPayload("dummy"),
-				hash:      powValueTypes.NewHash(sha256.New()),
+				createdAt:         mo.None[powValueTypes.CreatedAt](),
+				resource:          mo.None[powValueTypes.Resource](),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
 			},
@@ -171,11 +171,11 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
 			want:    Challenge{},
@@ -190,11 +190,11 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
 			want:    Challenge{},
@@ -209,11 +209,11 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
 					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-						":{{ .Challenge.Payload.ToString }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
 			want:    Challenge{},
