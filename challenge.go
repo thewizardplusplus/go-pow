@@ -16,6 +16,7 @@ type ChallengeHashData struct {
 type Challenge struct {
 	leadingZeroBitCount powValueTypes.LeadingZeroBitCount
 	createdAt           mo.Option[powValueTypes.CreatedAt]
+	ttl                 mo.Option[powValueTypes.TTL]
 	resource            mo.Option[powValueTypes.Resource]
 	serializedPayload   powValueTypes.SerializedPayload
 	hash                powValueTypes.Hash
@@ -42,6 +43,10 @@ func (entity Challenge) TargetBitIndex() (powValueTypes.TargetBitIndex, error) {
 
 func (entity Challenge) CreatedAt() mo.Option[powValueTypes.CreatedAt] {
 	return entity.createdAt
+}
+
+func (entity Challenge) TTL() mo.Option[powValueTypes.TTL] {
+	return entity.ttl
 }
 
 func (entity Challenge) Resource() mo.Option[powValueTypes.Resource] {
