@@ -14,20 +14,20 @@ type ChallengeHashData struct {
 }
 
 type Challenge struct {
-	leadingZeroCount powValueTypes.LeadingZeroCount
-	createdAt        mo.Option[powValueTypes.CreatedAt]
-	resource         mo.Option[powValueTypes.Resource]
-	payload          powValueTypes.Payload
-	hash             powValueTypes.Hash
-	hashDataLayout   powValueTypes.HashDataLayout
+	leadingZeroBitCount powValueTypes.LeadingZeroBitCount
+	createdAt           mo.Option[powValueTypes.CreatedAt]
+	resource            mo.Option[powValueTypes.Resource]
+	payload             powValueTypes.Payload
+	hash                powValueTypes.Hash
+	hashDataLayout      powValueTypes.HashDataLayout
 }
 
-func (entity Challenge) LeadingZeroCount() powValueTypes.LeadingZeroCount {
-	return entity.leadingZeroCount
+func (entity Challenge) LeadingZeroBitCount() powValueTypes.LeadingZeroBitCount { //nolint:lll
+	return entity.leadingZeroBitCount
 }
 
 func (entity Challenge) TargetBitIndex() (powValueTypes.TargetBitIndex, error) {
-	rawValue := entity.hash.SizeInBits() - entity.leadingZeroCount.ToInt()
+	rawValue := entity.hash.SizeInBits() - entity.leadingZeroBitCount.ToInt()
 
 	value, err := powValueTypes.NewTargetBitIndex(rawValue)
 	if err != nil {

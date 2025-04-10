@@ -9,23 +9,23 @@ import (
 )
 
 type ChallengeBuilder struct {
-	leadingZeroCount mo.Option[powValueTypes.LeadingZeroCount]
-	targetBitIndex   mo.Option[powValueTypes.TargetBitIndex]
-	createdAt        mo.Option[powValueTypes.CreatedAt]
-	resource         mo.Option[powValueTypes.Resource]
-	payload          mo.Option[powValueTypes.Payload]
-	hash             mo.Option[powValueTypes.Hash]
-	hashDataLayout   mo.Option[powValueTypes.HashDataLayout]
+	leadingZeroBitCount mo.Option[powValueTypes.LeadingZeroBitCount]
+	targetBitIndex      mo.Option[powValueTypes.TargetBitIndex]
+	createdAt           mo.Option[powValueTypes.CreatedAt]
+	resource            mo.Option[powValueTypes.Resource]
+	payload             mo.Option[powValueTypes.Payload]
+	hash                mo.Option[powValueTypes.Hash]
+	hashDataLayout      mo.Option[powValueTypes.HashDataLayout]
 }
 
 func NewChallengeBuilder() *ChallengeBuilder {
 	return &ChallengeBuilder{}
 }
 
-func (builder *ChallengeBuilder) SetLeadingZeroCount(
-	value powValueTypes.LeadingZeroCount,
+func (builder *ChallengeBuilder) SetLeadingZeroBitCount(
+	value powValueTypes.LeadingZeroBitCount,
 ) *ChallengeBuilder {
-	builder.leadingZeroCount = mo.Some(value)
+	builder.leadingZeroBitCount = mo.Some(value)
 	return builder
 }
 
@@ -74,18 +74,20 @@ func (builder *ChallengeBuilder) SetHashDataLayout(
 func (builder ChallengeBuilder) Build() (Challenge, error) {
 	var errs []error
 
-	leadingZeroCount, isLeadingZeroCountPresent := builder.leadingZeroCount.Get()
+	leadingZeroBitCount, isLeadingZeroBitCountPresent :=
+		builder.leadingZeroBitCount.Get()
 	targetBitIndex, isTargetBitIndexPresent := builder.targetBitIndex.Get()
-	if !isLeadingZeroCountPresent && !isTargetBitIndexPresent {
+	if !isLeadingZeroBitCountPresent && !isTargetBitIndexPresent {
 		errs = append(
 			errs,
-			errors.New("leading zero count or target bit index is required"),
+			errors.New("leading zero bit count or target bit index is required"),
 		)
-	} else if isLeadingZeroCountPresent && isTargetBitIndexPresent {
+	} else if isLeadingZeroBitCountPresent && isTargetBitIndexPresent {
 		errs = append(
 			errs,
 			errors.New(
-				"leading zero count and target bit index are specified at the same time",
+				"leading zero bit count and target bit index "+
+					"are specified at the same time",
 			),
 		)
 	}
@@ -98,21 +100,23 @@ func (builder ChallengeBuilder) Build() (Challenge, error) {
 	hash, isPresent := builder.hash.Get()
 	if !isPresent {
 		errs = append(errs, errors.New("hash is required"))
-	} else if isLeadingZeroCountPresent &&
-		leadingZeroCount.ToInt() > hash.SizeInBits() {
+	} else if isLeadingZeroBitCountPresent &&
+		leadingZeroBitCount.ToInt() > hash.SizeInBits() {
 		errs = append(
 			errs,
-			errors.New("leading zero count exceeds the hash checksum size"),
+			errors.New("leading zero bit count exceeds the hash checksum size"),
 		)
 	} else if isTargetBitIndexPresent {
-		rawLeadingZeroCount := hash.SizeInBits() - targetBitIndex.ToInt()
+		rawLeadingZeroBitCount := hash.SizeInBits() - targetBitIndex.ToInt()
 
 		var err error
-		leadingZeroCount, err = powValueTypes.NewLeadingZeroCount(rawLeadingZeroCount)
+		leadingZeroBitCount, err = powValueTypes.NewLeadingZeroBitCount(
+			rawLeadingZeroBitCount,
+		)
 		if err != nil {
 			errs = append(
 				errs,
-				fmt.Errorf("unable to construct the leading zero count: %w", err),
+				fmt.Errorf("unable to construct the leading zero bit count: %w", err),
 			)
 		}
 	}
@@ -127,12 +131,12 @@ func (builder ChallengeBuilder) Build() (Challenge, error) {
 	}
 
 	entity := Challenge{
-		leadingZeroCount: leadingZeroCount,
-		createdAt:        builder.createdAt,
-		resource:         builder.resource,
-		payload:          payload,
-		hash:             hash,
-		hashDataLayout:   hashDataLayout,
+		leadingZeroBitCount: leadingZeroBitCount,
+		createdAt:           builder.createdAt,
+		resource:            builder.resource,
+		payload:             payload,
+		hash:                hash,
+		hashDataLayout:      hashDataLayout,
 	}
 	return entity, nil
 }

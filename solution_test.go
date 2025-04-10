@@ -24,8 +24,8 @@ func TestSolution_Challenge(test *testing.T) {
 			name: "success",
 			fields: fields{
 				challenge: Challenge{
-					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-						value, err := powValueTypes.NewLeadingZeroCount(23)
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(23)
 						require.NoError(test, err)
 
 						return value
@@ -33,15 +33,15 @@ func TestSolution_Challenge(test *testing.T) {
 					payload: powValueTypes.NewPayload("dummy"),
 					hash:    powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
-						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 							":{{ .Challenge.Payload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
 				},
 			},
 			want: Challenge{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(23)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
 					require.NoError(test, err)
 
 					return value
@@ -49,7 +49,7 @@ func TestSolution_Challenge(test *testing.T) {
 				payload: powValueTypes.NewPayload("dummy"),
 				hash:    powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
@@ -151,8 +151,8 @@ func TestSolution_Verify(test *testing.T) {
 			name: "success",
 			fields: fields{
 				challenge: Challenge{
-					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-						value, err := powValueTypes.NewLeadingZeroCount(5)
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(5)
 						require.NoError(test, err)
 
 						return value
@@ -160,7 +160,7 @@ func TestSolution_Verify(test *testing.T) {
 					payload: powValueTypes.NewPayload("dummy"),
 					hash:    powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
-						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 							":{{ .Challenge.Payload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
@@ -184,8 +184,8 @@ func TestSolution_Verify(test *testing.T) {
 			name: "error/unable to get the target bit index",
 			fields: fields{
 				challenge: Challenge{
-					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-						value, err := powValueTypes.NewLeadingZeroCount(1000)
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(1000)
 						require.NoError(test, err)
 
 						return value
@@ -193,7 +193,7 @@ func TestSolution_Verify(test *testing.T) {
 					payload: powValueTypes.NewPayload("dummy"),
 					hash:    powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
-						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 							":{{ .Challenge.Payload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
@@ -217,8 +217,8 @@ func TestSolution_Verify(test *testing.T) {
 			name: "error/unable to execute the hash data layout",
 			fields: fields{
 				challenge: Challenge{
-					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-						value, err := powValueTypes.NewLeadingZeroCount(5)
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(5)
 						require.NoError(test, err)
 
 						return value
@@ -248,8 +248,8 @@ func TestSolution_Verify(test *testing.T) {
 			name: "error/hash sums don't match",
 			fields: fields{
 				challenge: Challenge{
-					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-						value, err := powValueTypes.NewLeadingZeroCount(5)
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(5)
 						require.NoError(test, err)
 
 						return value
@@ -257,7 +257,7 @@ func TestSolution_Verify(test *testing.T) {
 					payload: powValueTypes.NewPayload("dummy"),
 					hash:    powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
-						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 							":{{ .Challenge.Payload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
@@ -276,8 +276,8 @@ func TestSolution_Verify(test *testing.T) {
 			name: "error/hash sum doesn't fit the target",
 			fields: fields{
 				challenge: Challenge{
-					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-						value, err := powValueTypes.NewLeadingZeroCount(23)
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(23)
 						require.NoError(test, err)
 
 						return value
@@ -285,7 +285,7 @@ func TestSolution_Verify(test *testing.T) {
 					payload: powValueTypes.NewPayload("dummy"),
 					hash:    powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
-						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 							":{{ .Challenge.Payload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),

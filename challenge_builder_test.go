@@ -22,8 +22,8 @@ func TestChallengeBuilder_Build(test *testing.T) {
 		{
 			name: "success/all parameters",
 			builder: NewChallengeBuilder().
-				SetLeadingZeroCount(func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(23)
+				SetLeadingZeroBitCount(func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
 					require.NoError(test, err)
 
 					return value
@@ -44,13 +44,13 @@ func TestChallengeBuilder_Build(test *testing.T) {
 				SetPayload(powValueTypes.NewPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
 			want: Challenge{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(23)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
 					require.NoError(test, err)
 
 					return value
@@ -71,7 +71,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 				payload: powValueTypes.NewPayload("dummy"),
 				hash:    powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
@@ -79,10 +79,10 @@ func TestChallengeBuilder_Build(test *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name: "success/required parameters only/leading zero count is specified",
+			name: "success/required parameters only/leading zero bit count is specified",
 			builder: NewChallengeBuilder().
-				SetLeadingZeroCount(func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(23)
+				SetLeadingZeroBitCount(func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
 					require.NoError(test, err)
 
 					return value
@@ -90,13 +90,13 @@ func TestChallengeBuilder_Build(test *testing.T) {
 				SetPayload(powValueTypes.NewPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
 			want: Challenge{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(23)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
 					require.NoError(test, err)
 
 					return value
@@ -106,7 +106,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 				payload:   powValueTypes.NewPayload("dummy"),
 				hash:      powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
@@ -125,13 +125,13 @@ func TestChallengeBuilder_Build(test *testing.T) {
 				SetPayload(powValueTypes.NewPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
 			want: Challenge{
-				leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(23)
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
 					require.NoError(test, err)
 
 					return value
@@ -141,7 +141,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 				payload:   powValueTypes.NewPayload("dummy"),
 				hash:      powValueTypes.NewHash(sha256.New()),
 				hashDataLayout: powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
@@ -156,10 +156,11 @@ func TestChallengeBuilder_Build(test *testing.T) {
 		},
 		{
 			name: "error/" +
-				"leading zero count and target bit index are specified at the same time",
+				"leading zero bit count and target bit index " +
+				"are specified at the same time",
 			builder: NewChallengeBuilder().
-				SetLeadingZeroCount(func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(23)
+				SetLeadingZeroBitCount(func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
 					require.NoError(test, err)
 
 					return value
@@ -173,7 +174,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 				SetPayload(powValueTypes.NewPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
@@ -181,10 +182,10 @@ func TestChallengeBuilder_Build(test *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
-			name: "error/leading zero count is too large",
+			name: "error/leading zero bit count is too large",
 			builder: NewChallengeBuilder().
-				SetLeadingZeroCount(func() powValueTypes.LeadingZeroCount {
-					value, err := powValueTypes.NewLeadingZeroCount(1000)
+				SetLeadingZeroBitCount(func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(1000)
 					require.NoError(test, err)
 
 					return value
@@ -192,7 +193,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 				SetPayload(powValueTypes.NewPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),
@@ -211,7 +212,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 				SetPayload(powValueTypes.NewPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
-					"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 						":{{ .Challenge.Payload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				)),

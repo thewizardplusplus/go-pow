@@ -22,8 +22,8 @@ func TestSolutionBuilder_Build(test *testing.T) {
 			name: "success",
 			builder: NewSolutionBuilder().
 				SetChallenge(Challenge{
-					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-						value, err := powValueTypes.NewLeadingZeroCount(23)
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(23)
 						require.NoError(test, err)
 
 						return value
@@ -31,7 +31,7 @@ func TestSolutionBuilder_Build(test *testing.T) {
 					payload: powValueTypes.NewPayload("dummy"),
 					hash:    powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
-						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 							":{{ .Challenge.Payload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
@@ -45,8 +45,8 @@ func TestSolutionBuilder_Build(test *testing.T) {
 				SetHashSum(powValueTypes.NewHashSum(bytes.Repeat([]byte("0"), 32))),
 			want: Solution{
 				challenge: Challenge{
-					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-						value, err := powValueTypes.NewLeadingZeroCount(23)
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(23)
 						require.NoError(test, err)
 
 						return value
@@ -54,7 +54,7 @@ func TestSolutionBuilder_Build(test *testing.T) {
 					payload: powValueTypes.NewPayload("dummy"),
 					hash:    powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
-						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 							":{{ .Challenge.Payload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
@@ -79,8 +79,8 @@ func TestSolutionBuilder_Build(test *testing.T) {
 			name: "error/invalid hash sum length",
 			builder: NewSolutionBuilder().
 				SetChallenge(Challenge{
-					leadingZeroCount: func() powValueTypes.LeadingZeroCount {
-						value, err := powValueTypes.NewLeadingZeroCount(23)
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(23)
 						require.NoError(test, err)
 
 						return value
@@ -88,7 +88,7 @@ func TestSolutionBuilder_Build(test *testing.T) {
 					payload: powValueTypes.NewPayload("dummy"),
 					hash:    powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
-						"{{ .Challenge.LeadingZeroCount.ToInt }}" +
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
 							":{{ .Challenge.Payload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
