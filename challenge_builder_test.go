@@ -41,7 +41,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 					Host:   "example.com",
 					Path:   "/",
 				})).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(
 					powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
@@ -66,9 +66,11 @@ func TestChallengeBuilder_Build(test *testing.T) {
 					Host:   "example.com",
 					Path:   "/",
 				})),
-				payload:        powValueTypes.NewPayload("dummy"),
-				hash:           powValueTypes.NewHash(sha256.New()),
-				hashDataLayout: powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"dummy {{ .Dummy }}",
+				),
 			},
 			wantErr: assert.NoError,
 		},
@@ -81,7 +83,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(
 					powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
@@ -93,11 +95,13 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}(),
-				createdAt:      mo.None[powValueTypes.CreatedAt](),
-				resource:       mo.None[powValueTypes.Resource](),
-				payload:        powValueTypes.NewPayload("dummy"),
-				hash:           powValueTypes.NewHash(sha256.New()),
-				hashDataLayout: powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
+				createdAt:         mo.None[powValueTypes.CreatedAt](),
+				resource:          mo.None[powValueTypes.Resource](),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"dummy {{ .Dummy }}",
+				),
 			},
 			wantErr: assert.NoError,
 		},
@@ -110,7 +114,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(
 					powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
@@ -122,11 +126,13 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}(),
-				createdAt:      mo.None[powValueTypes.CreatedAt](),
-				resource:       mo.None[powValueTypes.Resource](),
-				payload:        powValueTypes.NewPayload("dummy"),
-				hash:           powValueTypes.NewHash(sha256.New()),
-				hashDataLayout: powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
+				createdAt:         mo.None[powValueTypes.CreatedAt](),
+				resource:          mo.None[powValueTypes.Resource](),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"dummy {{ .Dummy }}",
+				),
 			},
 			wantErr: assert.NoError,
 		},
@@ -153,7 +159,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(
 					powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
@@ -170,7 +176,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(
 					powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
@@ -187,7 +193,7 @@ func TestChallengeBuilder_Build(test *testing.T) {
 
 					return value
 				}()).
-				SetPayload(powValueTypes.NewPayload("dummy")).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
 				SetHash(powValueTypes.NewHash(sha256.New())).
 				SetHashDataLayout(
 					powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),

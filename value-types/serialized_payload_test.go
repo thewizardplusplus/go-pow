@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewPayload(test *testing.T) {
+func TestNewSerializedPayload(test *testing.T) {
 	type args struct {
 		rawValue string
 	}
@@ -14,14 +14,14 @@ func TestNewPayload(test *testing.T) {
 	for _, data := range []struct {
 		name string
 		args args
-		want Payload
+		want SerializedPayload
 	}{
 		{
 			name: "success/non-empty",
 			args: args{
 				rawValue: "dummy",
 			},
-			want: Payload{
+			want: SerializedPayload{
 				rawValue: "dummy",
 			},
 		},
@@ -30,20 +30,20 @@ func TestNewPayload(test *testing.T) {
 			args: args{
 				rawValue: "",
 			},
-			want: Payload{
+			want: SerializedPayload{
 				rawValue: "",
 			},
 		},
 	} {
 		test.Run(data.name, func(test *testing.T) {
-			got := NewPayload(data.args.rawValue)
+			got := NewSerializedPayload(data.args.rawValue)
 
 			assert.Equal(test, data.want, got)
 		})
 	}
 }
 
-func TestPayload_ToString(test *testing.T) {
+func TestSerializedPayload_ToString(test *testing.T) {
 	type fields struct {
 		rawValue string
 	}
@@ -62,7 +62,7 @@ func TestPayload_ToString(test *testing.T) {
 		},
 	} {
 		test.Run(data.name, func(test *testing.T) {
-			value := Payload{
+			value := SerializedPayload{
 				rawValue: data.fields.rawValue,
 			}
 			got := value.ToString()

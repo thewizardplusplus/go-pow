@@ -30,8 +30,8 @@ func TestSolution_Challenge(test *testing.T) {
 
 						return value
 					}(),
-					payload: powValueTypes.NewPayload("dummy"),
-					hash:    powValueTypes.NewHash(sha256.New()),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
 						"dummy {{ .Dummy }}",
 					),
@@ -44,9 +44,11 @@ func TestSolution_Challenge(test *testing.T) {
 
 					return value
 				}(),
-				payload:        powValueTypes.NewPayload("dummy"),
-				hash:           powValueTypes.NewHash(sha256.New()),
-				hashDataLayout: powValueTypes.MustParseHashDataLayout("dummy {{ .Dummy }}"),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"dummy {{ .Dummy }}",
+				),
 			},
 		},
 	} {
@@ -151,11 +153,11 @@ func TestSolution_Verify(test *testing.T) {
 
 						return value
 					}(),
-					payload: powValueTypes.NewPayload("dummy"),
-					hash:    powValueTypes.NewHash(sha256.New()),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
 						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-							":{{ .Challenge.Payload.ToString }}" +
+							":{{ .Challenge.SerializedPayload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
 				},
@@ -184,11 +186,11 @@ func TestSolution_Verify(test *testing.T) {
 
 						return value
 					}(),
-					payload: powValueTypes.NewPayload("dummy"),
-					hash:    powValueTypes.NewHash(sha256.New()),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
 						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-							":{{ .Challenge.Payload.ToString }}" +
+							":{{ .Challenge.SerializedPayload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
 				},
@@ -217,8 +219,8 @@ func TestSolution_Verify(test *testing.T) {
 
 						return value
 					}(),
-					payload: powValueTypes.NewPayload("dummy"),
-					hash:    powValueTypes.NewHash(sha256.New()),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
 						"dummy {{ .Dummy }}",
 					),
@@ -248,11 +250,11 @@ func TestSolution_Verify(test *testing.T) {
 
 						return value
 					}(),
-					payload: powValueTypes.NewPayload("dummy"),
-					hash:    powValueTypes.NewHash(sha256.New()),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
 						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-							":{{ .Challenge.Payload.ToString }}" +
+							":{{ .Challenge.SerializedPayload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
 				},
@@ -276,11 +278,11 @@ func TestSolution_Verify(test *testing.T) {
 
 						return value
 					}(),
-					payload: powValueTypes.NewPayload("dummy"),
-					hash:    powValueTypes.NewHash(sha256.New()),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
 						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-							":{{ .Challenge.Payload.ToString }}" +
+							":{{ .Challenge.SerializedPayload.ToString }}" +
 							":{{ .Nonce.ToString }}",
 					),
 				},

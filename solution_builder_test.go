@@ -28,8 +28,8 @@ func TestSolutionBuilder_Build(test *testing.T) {
 
 						return value
 					}(),
-					payload: powValueTypes.NewPayload("dummy"),
-					hash:    powValueTypes.NewHash(sha256.New()),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
 						"dummy {{ .Dummy }}",
 					),
@@ -49,8 +49,8 @@ func TestSolutionBuilder_Build(test *testing.T) {
 
 						return value
 					}(),
-					payload: powValueTypes.NewPayload("dummy"),
-					hash:    powValueTypes.NewHash(sha256.New()),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
 						"dummy {{ .Dummy }}",
 					),
@@ -81,8 +81,8 @@ func TestSolutionBuilder_Build(test *testing.T) {
 
 						return value
 					}(),
-					payload: powValueTypes.NewPayload("dummy"),
-					hash:    powValueTypes.NewHash(sha256.New()),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
 					hashDataLayout: powValueTypes.MustParseHashDataLayout(
 						"dummy {{ .Dummy }}",
 					),
