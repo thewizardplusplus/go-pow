@@ -200,6 +200,52 @@ func TestChallenge_CreatedAt(test *testing.T) {
 	}
 }
 
+func TestChallenge_TTL(test *testing.T) {
+	type fields struct {
+		ttl mo.Option[powValueTypes.TTL]
+	}
+
+	for _, data := range []struct {
+		name   string
+		fields fields
+		want   mo.Option[powValueTypes.TTL]
+	}{
+		{
+			name: "success/is present",
+			fields: fields{
+				ttl: func() mo.Option[powValueTypes.TTL] {
+					value, err := powValueTypes.NewTTL(5*time.Minute + 23*time.Second)
+					require.NoError(test, err)
+
+					return mo.Some(value)
+				}(),
+			},
+			want: func() mo.Option[powValueTypes.TTL] {
+				value, err := powValueTypes.NewTTL(5*time.Minute + 23*time.Second)
+				require.NoError(test, err)
+
+				return mo.Some(value)
+			}(),
+		},
+		{
+			name: "success/is absent",
+			fields: fields{
+				ttl: mo.None[powValueTypes.TTL](),
+			},
+			want: mo.None[powValueTypes.TTL](),
+		},
+	} {
+		test.Run(data.name, func(test *testing.T) {
+			entity := Challenge{
+				ttl: data.fields.ttl,
+			}
+			got := entity.TTL()
+
+			assert.Equal(test, data.want, got)
+		})
+	}
+}
+
 func TestChallenge_Resource(test *testing.T) {
 	type fields struct {
 		resource mo.Option[powValueTypes.Resource]
