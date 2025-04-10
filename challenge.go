@@ -2,6 +2,7 @@ package pow
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/samber/mo"
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
@@ -47,6 +48,14 @@ func (entity Challenge) CreatedAt() mo.Option[powValueTypes.CreatedAt] {
 
 func (entity Challenge) TTL() mo.Option[powValueTypes.TTL] {
 	return entity.ttl
+}
+
+func (entity Challenge) IsAlive() bool {
+	createdAt, isCreatedAtPresent := entity.createdAt.Get()
+	ttl, isTTLPresent := entity.ttl.Get()
+	return !isCreatedAtPresent ||
+		!isTTLPresent ||
+		time.Since(createdAt.ToTime()) <= ttl.ToDuration()
 }
 
 func (entity Challenge) Resource() mo.Option[powValueTypes.Resource] {

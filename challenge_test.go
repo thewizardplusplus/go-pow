@@ -246,6 +246,98 @@ func TestChallenge_TTL(test *testing.T) {
 	}
 }
 
+func TestChallenge_IsAlive(test *testing.T) {
+	type fields struct {
+		createdAt mo.Option[powValueTypes.CreatedAt]
+		ttl       mo.Option[powValueTypes.TTL]
+	}
+
+	for _, data := range []struct {
+		name   string
+		fields fields
+		want   assert.BoolAssertionFunc
+	}{
+		{
+			name: "success/is alive/within the TTL",
+			fields: fields{
+				createdAt: func() mo.Option[powValueTypes.CreatedAt] {
+					value, err := powValueTypes.NewCreatedAt(
+						time.Date(2000, time.January, 2, 3, 4, 5, 6, time.UTC),
+					)
+					require.NoError(test, err)
+
+					return mo.Some(value)
+				}(),
+				ttl: func() mo.Option[powValueTypes.TTL] {
+					value, err := powValueTypes.NewTTL(100 * 365 * 24 * time.Hour)
+					require.NoError(test, err)
+
+					return mo.Some(value)
+				}(),
+			},
+			want: assert.True,
+		},
+		{
+			name: "success/is alive/`CreatedAt` timestamp isn't specified",
+			fields: fields{
+				createdAt: mo.None[powValueTypes.CreatedAt](),
+				ttl: func() mo.Option[powValueTypes.TTL] {
+					value, err := powValueTypes.NewTTL(100 * 365 * 24 * time.Hour)
+					require.NoError(test, err)
+
+					return mo.Some(value)
+				}(),
+			},
+			want: assert.True,
+		},
+		{
+			name: "success/is alive/TTL isn't specified",
+			fields: fields{
+				createdAt: func() mo.Option[powValueTypes.CreatedAt] {
+					value, err := powValueTypes.NewCreatedAt(
+						time.Date(2000, time.January, 2, 3, 4, 5, 6, time.UTC),
+					)
+					require.NoError(test, err)
+
+					return mo.Some(value)
+				}(),
+				ttl: mo.None[powValueTypes.TTL](),
+			},
+			want: assert.True,
+		},
+		{
+			name: "success/is dead",
+			fields: fields{
+				createdAt: func() mo.Option[powValueTypes.CreatedAt] {
+					value, err := powValueTypes.NewCreatedAt(
+						time.Date(2000, time.January, 2, 3, 4, 5, 6, time.UTC),
+					)
+					require.NoError(test, err)
+
+					return mo.Some(value)
+				}(),
+				ttl: func() mo.Option[powValueTypes.TTL] {
+					value, err := powValueTypes.NewTTL(time.Second)
+					require.NoError(test, err)
+
+					return mo.Some(value)
+				}(),
+			},
+			want: assert.False,
+		},
+	} {
+		test.Run(data.name, func(test *testing.T) {
+			entity := Challenge{
+				createdAt: data.fields.createdAt,
+				ttl:       data.fields.ttl,
+			}
+			got := entity.IsAlive()
+
+			data.want(test, got)
+		})
+	}
+}
+
 func TestChallenge_Resource(test *testing.T) {
 	type fields struct {
 		resource mo.Option[powValueTypes.Resource]
