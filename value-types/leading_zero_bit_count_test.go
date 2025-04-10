@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewLeadingZeroCount(test *testing.T) {
+func TestNewLeadingZeroBitCount(test *testing.T) {
 	type args struct {
 		rawValue int
 	}
@@ -14,7 +14,7 @@ func TestNewLeadingZeroCount(test *testing.T) {
 	for _, data := range []struct {
 		name    string
 		args    args
-		want    LeadingZeroCount
+		want    LeadingZeroBitCount
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
@@ -22,7 +22,7 @@ func TestNewLeadingZeroCount(test *testing.T) {
 			args: args{
 				rawValue: 23,
 			},
-			want: LeadingZeroCount{
+			want: LeadingZeroBitCount{
 				rawValue: 23,
 			},
 			wantErr: assert.NoError,
@@ -32,7 +32,7 @@ func TestNewLeadingZeroCount(test *testing.T) {
 			args: args{
 				rawValue: 0,
 			},
-			want: LeadingZeroCount{
+			want: LeadingZeroBitCount{
 				rawValue: 0,
 			},
 			wantErr: assert.NoError,
@@ -42,12 +42,12 @@ func TestNewLeadingZeroCount(test *testing.T) {
 			args: args{
 				rawValue: -23,
 			},
-			want:    LeadingZeroCount{},
+			want:    LeadingZeroBitCount{},
 			wantErr: assert.Error,
 		},
 	} {
 		test.Run(data.name, func(test *testing.T) {
-			got, err := NewLeadingZeroCount(data.args.rawValue)
+			got, err := NewLeadingZeroBitCount(data.args.rawValue)
 
 			assert.Equal(test, data.want, got)
 			data.wantErr(test, err)
@@ -55,7 +55,7 @@ func TestNewLeadingZeroCount(test *testing.T) {
 	}
 }
 
-func TestLeadingZeroCount_ToInt(test *testing.T) {
+func TestLeadingZeroBitCount_ToInt(test *testing.T) {
 	type fields struct {
 		rawValue int
 	}
@@ -74,7 +74,7 @@ func TestLeadingZeroCount_ToInt(test *testing.T) {
 		},
 	} {
 		test.Run(data.name, func(test *testing.T) {
-			value := LeadingZeroCount{
+			value := LeadingZeroBitCount{
 				rawValue: data.fields.rawValue,
 			}
 			got := value.ToInt()
