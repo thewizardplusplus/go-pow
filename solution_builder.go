@@ -49,10 +49,10 @@ func (builder SolutionBuilder) Build() (Solution, error) {
 		errs = append(errs, errors.New("nonce is required"))
 	}
 
-	hashSum, isPresent := builder.hashSum.Get()
-	if !isPresent {
-		errs = append(errs, errors.New("hash sum is required"))
-	} else if isChallengePresent && hashSum.Len() != challenge.hash.SizeInBytes() {
+	hashSum, isHashSumPresent := builder.hashSum.Get()
+	if isHashSumPresent &&
+		isChallengePresent &&
+		hashSum.Len() != challenge.hash.SizeInBytes() {
 		errs = append(
 			errs,
 			errors.New("hash sum length doesn't match the hash checksum size"),
@@ -66,7 +66,7 @@ func (builder SolutionBuilder) Build() (Solution, error) {
 	entity := Solution{
 		challenge: challenge,
 		nonce:     nonce,
-		hashSum:   hashSum,
+		hashSum:   builder.hashSum,
 	}
 	return entity, nil
 }

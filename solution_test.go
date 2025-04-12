@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/samber/mo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
@@ -108,20 +109,27 @@ func TestSolution_Nonce(test *testing.T) {
 
 func TestSolution_HashSum(test *testing.T) {
 	type fields struct {
-		hashSum powValueTypes.HashSum
+		hashSum mo.Option[powValueTypes.HashSum]
 	}
 
 	for _, data := range []struct {
 		name   string
 		fields fields
-		want   powValueTypes.HashSum
+		want   mo.Option[powValueTypes.HashSum]
 	}{
 		{
-			name: "success",
+			name: "success/is present",
 			fields: fields{
-				hashSum: powValueTypes.NewHashSum([]byte("dummy")),
+				hashSum: mo.Some(powValueTypes.NewHashSum([]byte("dummy"))),
 			},
-			want: powValueTypes.NewHashSum([]byte("dummy")),
+			want: mo.Some(powValueTypes.NewHashSum([]byte("dummy"))),
+		},
+		{
+			name: "success/is absent",
+			fields: fields{
+				hashSum: mo.None[powValueTypes.HashSum](),
+			},
+			want: mo.None[powValueTypes.HashSum](),
 		},
 	} {
 		test.Run(data.name, func(test *testing.T) {
@@ -139,7 +147,7 @@ func TestSolution_Verify(test *testing.T) {
 	type fields struct {
 		challenge Challenge
 		nonce     powValueTypes.Nonce
-		hashSum   powValueTypes.HashSum
+		hashSum   mo.Option[powValueTypes.HashSum]
 	}
 
 	for _, data := range []struct {
@@ -148,7 +156,7 @@ func TestSolution_Verify(test *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
-			name: "success",
+			name: "success/hash sum is present",
 			fields: fields{
 				challenge: Challenge{
 					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
@@ -171,12 +179,40 @@ func TestSolution_Verify(test *testing.T) {
 
 					return value
 				}(),
-				hashSum: powValueTypes.NewHashSum([]byte{
+				hashSum: mo.Some(powValueTypes.NewHashSum([]byte{
 					0x00, 0x5d, 0x37, 0x2c, 0x56, 0xe6, 0xc6, 0xb5,
 					0x2a, 0xd4, 0xa8, 0x32, 0x56, 0x54, 0x69, 0x2e,
 					0xc9, 0xaa, 0x3a, 0xf5, 0xf7, 0x30, 0x21, 0x74,
 					0x8b, 0xc3, 0xfd, 0xb1, 0x24, 0xae, 0x9b, 0x20,
-				}),
+				})),
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "success/hash sum is absent",
+			fields: fields{
+				challenge: Challenge{
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(5)
+						require.NoError(test, err)
+
+						return value
+					}(),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
+					hashDataLayout: powValueTypes.MustParseHashDataLayout(
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
+							":{{ .Challenge.SerializedPayload.ToString }}" +
+							":{{ .Nonce.ToString }}",
+					),
+				},
+				nonce: func() powValueTypes.Nonce {
+					value, err := powValueTypes.NewNonce(big.NewInt(37))
+					require.NoError(test, err)
+
+					return value
+				}(),
+				hashSum: mo.None[powValueTypes.HashSum](),
 			},
 			wantErr: assert.NoError,
 		},
@@ -204,12 +240,7 @@ func TestSolution_Verify(test *testing.T) {
 
 					return value
 				}(),
-				hashSum: powValueTypes.NewHashSum([]byte{
-					0x00, 0x5d, 0x37, 0x2c, 0x56, 0xe6, 0xc6, 0xb5,
-					0x2a, 0xd4, 0xa8, 0x32, 0x56, 0x54, 0x69, 0x2e,
-					0xc9, 0xaa, 0x3a, 0xf5, 0xf7, 0x30, 0x21, 0x74,
-					0x8b, 0xc3, 0xfd, 0xb1, 0x24, 0xae, 0x9b, 0x20,
-				}),
+				hashSum: mo.None[powValueTypes.HashSum](),
 			},
 			wantErr: assert.Error,
 		},
@@ -235,12 +266,7 @@ func TestSolution_Verify(test *testing.T) {
 
 					return value
 				}(),
-				hashSum: powValueTypes.NewHashSum([]byte{
-					0x00, 0x5d, 0x37, 0x2c, 0x56, 0xe6, 0xc6, 0xb5,
-					0x2a, 0xd4, 0xa8, 0x32, 0x56, 0x54, 0x69, 0x2e,
-					0xc9, 0xaa, 0x3a, 0xf5, 0xf7, 0x30, 0x21, 0x74,
-					0x8b, 0xc3, 0xfd, 0xb1, 0x24, 0xae, 0x9b, 0x20,
-				}),
+				hashSum: mo.None[powValueTypes.HashSum](),
 			},
 			wantErr: assert.Error,
 		},
@@ -268,7 +294,7 @@ func TestSolution_Verify(test *testing.T) {
 
 					return value
 				}(),
-				hashSum: powValueTypes.NewHashSum([]byte("dummy")),
+				hashSum: mo.Some(powValueTypes.NewHashSum([]byte("dummy"))),
 			},
 			wantErr: assert.Error,
 		},
@@ -296,12 +322,12 @@ func TestSolution_Verify(test *testing.T) {
 
 					return value
 				}(),
-				hashSum: powValueTypes.NewHashSum([]byte{
+				hashSum: mo.Some(powValueTypes.NewHashSum([]byte{
 					0x2d, 0x55, 0x8a, 0x78, 0xdf, 0x38, 0xa3, 0xe4,
 					0x1c, 0x3f, 0x53, 0x24, 0xeb, 0x32, 0xaa, 0x31,
 					0x3b, 0x3f, 0xa7, 0xc3, 0xb4, 0xd3, 0xe8, 0x2f,
 					0x2b, 0x5d, 0x98, 0x96, 0xd1, 0xa2, 0x36, 0x34,
-				}),
+				})),
 			},
 			wantErr: assert.Error,
 		},

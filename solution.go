@@ -5,13 +5,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/samber/mo"
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
 )
 
 type Solution struct {
 	challenge Challenge
 	nonce     powValueTypes.Nonce
-	hashSum   powValueTypes.HashSum
+	hashSum   mo.Option[powValueTypes.HashSum]
 }
 
 func (entity Solution) Challenge() Challenge {
@@ -22,7 +23,7 @@ func (entity Solution) Nonce() powValueTypes.Nonce {
 	return entity.nonce
 }
 
-func (entity Solution) HashSum() powValueTypes.HashSum {
+func (entity Solution) HashSum() mo.Option[powValueTypes.HashSum] {
 	return entity.hashSum
 }
 
@@ -42,8 +43,10 @@ func (entity Solution) Verify() error {
 	}
 
 	hashSum := entity.challenge.hash.ApplyTo(hashData)
-	if !bytes.Equal(hashSum.ToBytes(), entity.hashSum.ToBytes()) {
-		return errors.New("hash sums don't match")
+
+	expectedHashSum, isPresent := entity.hashSum.Get()
+	if isPresent && !bytes.Equal(hashSum.ToBytes(), expectedHashSum.ToBytes()) {
+		return errors.New("hash sum doesn't match the expected one")
 	}
 
 	target := makeTarget(targetBitIndex)
