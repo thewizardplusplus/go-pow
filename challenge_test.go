@@ -486,7 +486,8 @@ func TestChallenge_Solve(test *testing.T) {
 		hashDataLayout      powValueTypes.HashDataLayout
 	}
 	type args struct {
-		ctx context.Context
+		ctx    context.Context
+		params SolveParams
 	}
 
 	for _, data := range []struct {
@@ -514,7 +515,8 @@ func TestChallenge_Solve(test *testing.T) {
 				),
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx:    context.Background(),
+				params: SolveParams{},
 			},
 			want: Solution{
 				challenge: Challenge{
@@ -570,7 +572,8 @@ func TestChallenge_Solve(test *testing.T) {
 				),
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx:    context.Background(),
+				params: SolveParams{},
 			},
 			want:    Solution{},
 			wantErr: assert.Error,
@@ -599,6 +602,33 @@ func TestChallenge_Solve(test *testing.T) {
 
 					return ctx
 				}(),
+				params: SolveParams{},
+			},
+			want:    Solution{},
+			wantErr: assert.Error,
+		},
+		{
+			name: "error/maximal attempt count is exceeded",
+			fields: fields{
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(5)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				),
+			},
+			args: args{
+				ctx: context.Background(),
+				params: SolveParams{
+					MaxAttemptCount: mo.Some(23),
+				},
 			},
 			want:    Solution{},
 			wantErr: assert.Error,
@@ -619,7 +649,8 @@ func TestChallenge_Solve(test *testing.T) {
 				),
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx:    context.Background(),
+				params: SolveParams{},
 			},
 			want:    Solution{},
 			wantErr: assert.Error,
@@ -632,7 +663,7 @@ func TestChallenge_Solve(test *testing.T) {
 				hash:                data.fields.hash,
 				hashDataLayout:      data.fields.hashDataLayout,
 			}
-			got, err := entity.Solve(data.args.ctx)
+			got, err := entity.Solve(data.args.ctx, data.args.params)
 
 			assert.Equal(test, data.want, got)
 			data.wantErr(test, err)
