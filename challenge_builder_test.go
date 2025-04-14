@@ -299,6 +299,23 @@ func TestChallengeBuilder_Build(test *testing.T) {
 			want:    Challenge{},
 			wantErr: assert.Error,
 		},
+		{
+			name: "error/unable to check the hash data layout",
+			builder: NewChallengeBuilder().
+				SetLeadingZeroBitCount(func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(23)
+					require.NoError(test, err)
+
+					return value
+				}()).
+				SetSerializedPayload(powValueTypes.NewSerializedPayload("dummy")).
+				SetHash(powValueTypes.NewHash(sha256.New())).
+				SetHashDataLayout(powValueTypes.MustParseHashDataLayout(
+					"dummy {{ .Dummy }}",
+				)),
+			want:    Challenge{},
+			wantErr: assert.Error,
+		},
 	} {
 		test.Run(data.name, func(test *testing.T) {
 			got, err := data.builder.Build()
