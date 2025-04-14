@@ -2,6 +2,7 @@ package pow
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -75,7 +76,14 @@ func (entity Challenge) HashDataLayout() powValueTypes.HashDataLayout {
 	return entity.hashDataLayout
 }
 
-func (entity Challenge) Solve(ctx context.Context) (Solution, error) {
+type SolveParams struct {
+	MaxAttemptCount mo.Option[int]
+}
+
+func (entity Challenge) Solve(
+	ctx context.Context,
+	params SolveParams,
+) (Solution, error) {
 	targetBitIndex, err := entity.TargetBitIndex()
 	if err != nil {
 		return Solution{}, fmt.Errorf("unable to get the target bit index: %w", err)
@@ -92,12 +100,17 @@ func (entity Challenge) Solve(ctx context.Context) (Solution, error) {
 	}
 
 	var hashSum powValueTypes.HashSum
-	for {
+	maxAttemptCount, isMaxAttemptCountPresent := params.MaxAttemptCount.Get()
+	for attemptIndex := 0; ; attemptIndex++ {
 		select {
 		case <-ctx.Done():
 			return Solution{}, fmt.Errorf("context is done: %w", ctx.Err())
 
 		default:
+		}
+
+		if isMaxAttemptCountPresent && attemptIndex >= maxAttemptCount {
+			return Solution{}, errors.New("maximal attempt count is exceeded")
 		}
 
 		hashData, err := entity.hashDataLayout.Execute(ChallengeHashData{
