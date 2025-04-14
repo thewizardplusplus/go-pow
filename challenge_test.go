@@ -1,6 +1,7 @@
 package pow
 
 import (
+	"context"
 	"crypto/sha256"
 	"hash"
 	"math/big"
@@ -484,10 +485,14 @@ func TestChallenge_Solve(test *testing.T) {
 		hash                powValueTypes.Hash
 		hashDataLayout      powValueTypes.HashDataLayout
 	}
+	type args struct {
+		ctx context.Context
+	}
 
 	for _, data := range []struct {
 		name    string
 		fields  fields
+		args    args
 		want    Solution
 		wantErr assert.ErrorAssertionFunc
 	}{
@@ -507,6 +512,9 @@ func TestChallenge_Solve(test *testing.T) {
 						":{{ .Challenge.SerializedPayload.ToString }}" +
 						":{{ .Nonce.ToString }}",
 				),
+			},
+			args: args{
+				ctx: context.Background(),
 			},
 			want: Solution{
 				challenge: Challenge{
@@ -561,6 +569,37 @@ func TestChallenge_Solve(test *testing.T) {
 						":{{ .Nonce.ToString }}",
 				),
 			},
+			args: args{
+				ctx: context.Background(),
+			},
+			want:    Solution{},
+			wantErr: assert.Error,
+		},
+		{
+			name: "error/context is done",
+			fields: fields{
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(5)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				),
+			},
+			args: args{
+				ctx: func() context.Context {
+					ctx, ctxCancel := context.WithCancel(context.Background())
+					ctxCancel()
+
+					return ctx
+				}(),
+			},
 			want:    Solution{},
 			wantErr: assert.Error,
 		},
@@ -579,6 +618,9 @@ func TestChallenge_Solve(test *testing.T) {
 					"dummy {{ .Dummy }}",
 				),
 			},
+			args: args{
+				ctx: context.Background(),
+			},
 			want:    Solution{},
 			wantErr: assert.Error,
 		},
@@ -590,7 +632,7 @@ func TestChallenge_Solve(test *testing.T) {
 				hash:                data.fields.hash,
 				hashDataLayout:      data.fields.hashDataLayout,
 			}
-			got, err := entity.Solve()
+			got, err := entity.Solve(data.args.ctx)
 
 			assert.Equal(test, data.want, got)
 			data.wantErr(test, err)
