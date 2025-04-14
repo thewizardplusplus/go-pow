@@ -77,7 +77,8 @@ func (entity Challenge) HashDataLayout() powValueTypes.HashDataLayout {
 }
 
 type SolveParams struct {
-	MaxAttemptCount mo.Option[int]
+	MaxAttemptCount          mo.Option[int]
+	RandomInitialNonceParams mo.Option[powValueTypes.RandomNonceParams]
 }
 
 func (entity Challenge) Solve(
@@ -91,12 +92,24 @@ func (entity Challenge) Solve(
 
 	target := makeTarget(targetBitIndex)
 
-	nonce, err := powValueTypes.NewZeroNonce()
-	if err != nil {
-		return Solution{}, fmt.Errorf(
-			"unable to construct the zero initial nonce: %w",
-			err,
-		)
+	var nonce powValueTypes.Nonce
+	if randomInitialNonceParams, isPresent :=
+		params.RandomInitialNonceParams.Get(); isPresent {
+		nonce, err = powValueTypes.NewRandomNonce(randomInitialNonceParams)
+		if err != nil {
+			return Solution{}, fmt.Errorf(
+				"unable to generate the random initial nonce: %w",
+				err,
+			)
+		}
+	} else {
+		nonce, err = powValueTypes.NewZeroNonce()
+		if err != nil {
+			return Solution{}, fmt.Errorf(
+				"unable to construct the zero initial nonce: %w",
+				err,
+			)
+		}
 	}
 
 	var hashSum powValueTypes.HashSum

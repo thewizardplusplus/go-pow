@@ -1,12 +1,14 @@
 package pow
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"hash"
 	"math/big"
 	"net/url"
 	"testing"
+	"testing/iotest"
 	"time"
 
 	"github.com/samber/mo"
@@ -498,7 +500,7 @@ func TestChallenge_Solve(test *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
-			name: "success",
+			name: "success/zero initial nonce",
 			fields: fields{
 				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
 					value, err := powValueTypes.NewLeadingZeroBitCount(5)
@@ -555,6 +557,69 @@ func TestChallenge_Solve(test *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
+			name: "success/random initial nonce",
+			fields: fields{
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(5)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				),
+			},
+			args: args{
+				ctx: context.Background(),
+				params: SolveParams{
+					RandomInitialNonceParams: mo.Some(powValueTypes.RandomNonceParams{
+						RandomReader: bytes.NewReader([]byte("dummy")),
+						MinRawValue:  big.NewInt(123),
+						MaxRawValue:  big.NewInt(142),
+					}),
+				},
+			},
+			want: Solution{
+				challenge: Challenge{
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(5)
+						require.NoError(test, err)
+
+						return value
+					}(),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash: powValueTypes.NewHash(func() hash.Hash {
+						hash := sha256.New()
+						hash.Write([]byte("5:dummy:129"))
+
+						return hash
+					}()),
+					hashDataLayout: powValueTypes.MustParseHashDataLayout(
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
+							":{{ .Challenge.SerializedPayload.ToString }}" +
+							":{{ .Nonce.ToString }}",
+					),
+				},
+				nonce: func() powValueTypes.Nonce {
+					value, err := powValueTypes.NewNonce(big.NewInt(129))
+					require.NoError(test, err)
+
+					return value
+				}(),
+				hashSum: mo.Some(powValueTypes.NewHashSum([]byte{
+					0x01, 0x2b, 0x29, 0x61, 0x88, 0x31, 0x8c, 0xa1,
+					0xe0, 0x93, 0x88, 0x91, 0x93, 0x32, 0x14, 0x48,
+					0xd5, 0xd7, 0x11, 0x49, 0x46, 0xe6, 0x68, 0x1c,
+					0x07, 0x75, 0xdb, 0x4c, 0xdc, 0x4e, 0x76, 0xb3,
+				})),
+			},
+			wantErr: assert.NoError,
+		},
+		{
 			name: "error/unable to get the target bit index",
 			fields: fields{
 				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
@@ -574,6 +639,36 @@ func TestChallenge_Solve(test *testing.T) {
 			args: args{
 				ctx:    context.Background(),
 				params: SolveParams{},
+			},
+			want:    Solution{},
+			wantErr: assert.Error,
+		},
+		{
+			name: "error/unable to generate the random initial nonce",
+			fields: fields{
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(5)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				),
+			},
+			args: args{
+				ctx: context.Background(),
+				params: SolveParams{
+					RandomInitialNonceParams: mo.Some(powValueTypes.RandomNonceParams{
+						RandomReader: iotest.ErrReader(iotest.ErrTimeout),
+						MinRawValue:  big.NewInt(123),
+						MaxRawValue:  big.NewInt(142),
+					}),
+				},
 			},
 			want:    Solution{},
 			wantErr: assert.Error,
