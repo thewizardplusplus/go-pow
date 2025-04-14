@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+
+	powErrors "github.com/thewizardplusplus/go-pow/errors"
 )
 
 const (
@@ -55,7 +57,7 @@ func NewRandomNonce(params RandomNonceParams) (Nonce, error) {
 	if err != nil {
 		return Nonce{}, fmt.Errorf(
 			"unable to generate the random big integer: %w",
-			err,
+			errors.Join(err, powErrors.ErrIO),
 		)
 	}
 

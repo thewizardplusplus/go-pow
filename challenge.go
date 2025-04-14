@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/samber/mo"
+	powErrors "github.com/thewizardplusplus/go-pow/errors"
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
 )
 
@@ -117,13 +118,19 @@ func (entity Challenge) Solve(
 	for attemptIndex := 0; ; attemptIndex++ {
 		select {
 		case <-ctx.Done():
-			return Solution{}, fmt.Errorf("context is done: %w", ctx.Err())
+			return Solution{}, fmt.Errorf(
+				"context is done: %w",
+				errors.Join(ctx.Err(), powErrors.ErrTaskInterruption),
+			)
 
 		default:
 		}
 
 		if isMaxAttemptCountPresent && attemptIndex >= maxAttemptCount {
-			return Solution{}, errors.New("maximal attempt count is exceeded")
+			return Solution{}, errors.Join(
+				errors.New("maximal attempt count is exceeded"),
+				powErrors.ErrTaskInterruption,
+			)
 		}
 
 		hashData, err := entity.hashDataLayout.Execute(ChallengeHashData{
