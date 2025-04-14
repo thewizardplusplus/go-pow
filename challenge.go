@@ -1,6 +1,7 @@
 package pow
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -74,7 +75,7 @@ func (entity Challenge) HashDataLayout() powValueTypes.HashDataLayout {
 	return entity.hashDataLayout
 }
 
-func (entity Challenge) Solve() (Solution, error) {
+func (entity Challenge) Solve(ctx context.Context) (Solution, error) {
 	targetBitIndex, err := entity.TargetBitIndex()
 	if err != nil {
 		return Solution{}, fmt.Errorf("unable to get the target bit index: %w", err)
@@ -92,6 +93,13 @@ func (entity Challenge) Solve() (Solution, error) {
 
 	var hashSum powValueTypes.HashSum
 	for {
+		select {
+		case <-ctx.Done():
+			return Solution{}, fmt.Errorf("context is done: %w", ctx.Err())
+
+		default:
+		}
+
 		hashData, err := entity.hashDataLayout.Execute(ChallengeHashData{
 			Challenge:      entity,
 			TargetBitIndex: targetBitIndex,
