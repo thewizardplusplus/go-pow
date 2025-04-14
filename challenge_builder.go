@@ -168,20 +168,14 @@ func (builder ChallengeBuilder) Build() (Challenge, error) {
 }
 
 func (builder ChallengeBuilder) checkHashDataLayout(entity Challenge) error {
-	targetBitIndex, err := entity.TargetBitIndex()
-	if err != nil {
-		return fmt.Errorf("unable to get the target bit index: %w", err)
-	}
-
 	nonce, err := powValueTypes.NewZeroNonce()
 	if err != nil {
 		return fmt.Errorf("unable to construct the zero nonce: %w", err)
 	}
 
 	if _, err := entity.hashDataLayout.Execute(ChallengeHashData{
-		Challenge:      entity,
-		TargetBitIndex: targetBitIndex,
-		Nonce:          nonce,
+		Challenge: entity,
+		Nonce:     nonce,
 	}); err != nil {
 		return fmt.Errorf("unable to execute the hash data layout: %w", err)
 	}

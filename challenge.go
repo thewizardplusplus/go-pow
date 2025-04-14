@@ -11,9 +11,8 @@ import (
 )
 
 type ChallengeHashData struct {
-	Challenge      Challenge
-	TargetBitIndex powValueTypes.TargetBitIndex
-	Nonce          powValueTypes.Nonce
+	Challenge Challenge
+	Nonce     powValueTypes.Nonce
 }
 
 type Challenge struct {
@@ -85,16 +84,10 @@ func (entity Challenge) Solve(
 	ctx context.Context,
 	params SolveParams,
 ) (Solution, error) {
-	targetBitIndex, err := entity.TargetBitIndex()
-	if err != nil {
-		return Solution{}, fmt.Errorf("unable to get the target bit index: %w", err)
-	}
-
-	target := makeTarget(targetBitIndex)
-
 	var nonce powValueTypes.Nonce
 	if randomInitialNonceParams, isPresent :=
 		params.RandomInitialNonceParams.Get(); isPresent {
+		var err error
 		nonce, err = powValueTypes.NewRandomNonce(randomInitialNonceParams)
 		if err != nil {
 			return Solution{}, fmt.Errorf(
@@ -103,6 +96,7 @@ func (entity Challenge) Solve(
 			)
 		}
 	} else {
+		var err error
 		nonce, err = powValueTypes.NewZeroNonce()
 		if err != nil {
 			return Solution{}, fmt.Errorf(
@@ -112,7 +106,13 @@ func (entity Challenge) Solve(
 		}
 	}
 
+	targetBitIndex, err := entity.TargetBitIndex()
+	if err != nil {
+		return Solution{}, fmt.Errorf("unable to get the target bit index: %w", err)
+	}
+
 	var hashSum powValueTypes.HashSum
+	target := makeTarget(targetBitIndex)
 	maxAttemptCount, isMaxAttemptCountPresent := params.MaxAttemptCount.Get()
 	for attemptIndex := 0; ; attemptIndex++ {
 		select {
@@ -127,9 +127,8 @@ func (entity Challenge) Solve(
 		}
 
 		hashData, err := entity.hashDataLayout.Execute(ChallengeHashData{
-			Challenge:      entity,
-			TargetBitIndex: targetBitIndex,
-			Nonce:          nonce,
+			Challenge: entity,
+			Nonce:     nonce,
 		})
 		if err != nil {
 			return Solution{}, fmt.Errorf(

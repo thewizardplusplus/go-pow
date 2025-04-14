@@ -217,34 +217,6 @@ func TestSolution_Verify(test *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name: "error/unable to get the target bit index",
-			fields: fields{
-				challenge: Challenge{
-					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
-						value, err := powValueTypes.NewLeadingZeroBitCount(1000)
-						require.NoError(test, err)
-
-						return value
-					}(),
-					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
-					hash:              powValueTypes.NewHash(sha256.New()),
-					hashDataLayout: powValueTypes.MustParseHashDataLayout(
-						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
-							":{{ .Challenge.SerializedPayload.ToString }}" +
-							":{{ .Nonce.ToString }}",
-					),
-				},
-				nonce: func() powValueTypes.Nonce {
-					value, err := powValueTypes.NewNonce(big.NewInt(37))
-					require.NoError(test, err)
-
-					return value
-				}(),
-				hashSum: mo.None[powValueTypes.HashSum](),
-			},
-			wantErr: assert.Error,
-		},
-		{
 			name: "error/unable to execute the hash data layout",
 			fields: fields{
 				challenge: Challenge{
@@ -295,6 +267,34 @@ func TestSolution_Verify(test *testing.T) {
 					return value
 				}(),
 				hashSum: mo.Some(powValueTypes.NewHashSum([]byte("dummy"))),
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "error/unable to get the target bit index",
+			fields: fields{
+				challenge: Challenge{
+					leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+						value, err := powValueTypes.NewLeadingZeroBitCount(1000)
+						require.NoError(test, err)
+
+						return value
+					}(),
+					serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+					hash:              powValueTypes.NewHash(sha256.New()),
+					hashDataLayout: powValueTypes.MustParseHashDataLayout(
+						"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
+							":{{ .Challenge.SerializedPayload.ToString }}" +
+							":{{ .Nonce.ToString }}",
+					),
+				},
+				nonce: func() powValueTypes.Nonce {
+					value, err := powValueTypes.NewNonce(big.NewInt(37))
+					require.NoError(test, err)
+
+					return value
+				}(),
+				hashSum: mo.None[powValueTypes.HashSum](),
 			},
 			wantErr: assert.Error,
 		},
