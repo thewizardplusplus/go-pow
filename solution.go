@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/samber/mo"
+	powErrors "github.com/thewizardplusplus/go-pow/errors"
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
 )
 
@@ -40,7 +41,10 @@ func (entity Solution) Verify() error {
 
 	expectedHashSum, isPresent := entity.hashSum.Get()
 	if isPresent && !bytes.Equal(hashSum.ToBytes(), expectedHashSum.ToBytes()) {
-		return errors.New("hash sum doesn't match the expected one")
+		return errors.Join(
+			errors.New("hash sum doesn't match the expected one"),
+			powErrors.ErrValidationFailure,
+		)
 	}
 
 	targetBitIndex, err := entity.challenge.TargetBitIndex()
@@ -50,7 +54,10 @@ func (entity Solution) Verify() error {
 
 	target := makeTarget(targetBitIndex)
 	if !isHashSumFitTarget(hashSum, target) {
-		return errors.New("hash sum doesn't fit the target")
+		return errors.Join(
+			errors.New("hash sum doesn't fit the target"),
+			powErrors.ErrValidationFailure,
+		)
 	}
 
 	return nil

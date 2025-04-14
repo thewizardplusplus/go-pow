@@ -7,6 +7,7 @@ import (
 	"testing/iotest"
 
 	"github.com/stretchr/testify/assert"
+	powErrors "github.com/thewizardplusplus/go-pow/errors"
 )
 
 func TestNewNonce(test *testing.T) {
@@ -139,8 +140,10 @@ func TestNewRandomNonce(test *testing.T) {
 					MaxRawValue:  big.NewInt(42),
 				},
 			},
-			want:    Nonce{},
-			wantErr: assert.Error,
+			want: Nonce{},
+			wantErr: func(test assert.TestingT, err error, msgAndArgs ...any) bool {
+				return assert.ErrorIs(test, err, powErrors.ErrIO)
+			},
 		},
 		{
 			name: "error/unable to construct the nonce",

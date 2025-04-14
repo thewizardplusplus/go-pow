@@ -8,6 +8,7 @@ import (
 	"github.com/samber/mo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	powErrors "github.com/thewizardplusplus/go-pow/errors"
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
 )
 
@@ -268,7 +269,9 @@ func TestSolution_Verify(test *testing.T) {
 				}(),
 				hashSum: mo.Some(powValueTypes.NewHashSum([]byte("dummy"))),
 			},
-			wantErr: assert.Error,
+			wantErr: func(test assert.TestingT, err error, msgAndArgs ...any) bool {
+				return assert.ErrorIs(test, err, powErrors.ErrValidationFailure)
+			},
 		},
 		{
 			name: "error/unable to get the target bit index",
@@ -329,7 +332,9 @@ func TestSolution_Verify(test *testing.T) {
 					0x2b, 0x5d, 0x98, 0x96, 0xd1, 0xa2, 0x36, 0x34,
 				})),
 			},
-			wantErr: assert.Error,
+			wantErr: func(test assert.TestingT, err error, msgAndArgs ...any) bool {
+				return assert.ErrorIs(test, err, powErrors.ErrValidationFailure)
+			},
 		},
 	} {
 		test.Run(data.name, func(test *testing.T) {

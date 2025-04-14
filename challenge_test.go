@@ -14,6 +14,7 @@ import (
 	"github.com/samber/mo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	powErrors "github.com/thewizardplusplus/go-pow/errors"
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
 )
 
@@ -620,7 +621,37 @@ func TestChallenge_Solve(test *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name: "error/unable to generate the random initial nonce",
+			name: "error/unable to generate the random initial nonce/regular error",
+			fields: fields{
+				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
+					value, err := powValueTypes.NewLeadingZeroBitCount(5)
+					require.NoError(test, err)
+
+					return value
+				}(),
+				serializedPayload: powValueTypes.NewSerializedPayload("dummy"),
+				hash:              powValueTypes.NewHash(sha256.New()),
+				hashDataLayout: powValueTypes.MustParseHashDataLayout(
+					"{{ .Challenge.LeadingZeroBitCount.ToInt }}" +
+						":{{ .Challenge.SerializedPayload.ToString }}" +
+						":{{ .Nonce.ToString }}",
+				),
+			},
+			args: args{
+				ctx: context.Background(),
+				params: SolveParams{
+					RandomInitialNonceParams: mo.Some(powValueTypes.RandomNonceParams{
+						RandomReader: bytes.NewReader([]byte("dummy")),
+						MinRawValue:  big.NewInt(142),
+						MaxRawValue:  big.NewInt(123),
+					}),
+				},
+			},
+			want:    Solution{},
+			wantErr: assert.Error,
+		},
+		{
+			name: "error/unable to generate the random initial nonce/I/O error",
 			fields: fields{
 				leadingZeroBitCount: func() powValueTypes.LeadingZeroBitCount {
 					value, err := powValueTypes.NewLeadingZeroBitCount(5)
@@ -646,8 +677,10 @@ func TestChallenge_Solve(test *testing.T) {
 					}),
 				},
 			},
-			want:    Solution{},
-			wantErr: assert.Error,
+			want: Solution{},
+			wantErr: func(test assert.TestingT, err error, msgAndArgs ...any) bool {
+				return assert.ErrorIs(test, err, powErrors.ErrIO)
+			},
 		},
 		{
 			name: "error/unable to get the target bit index",
@@ -699,8 +732,10 @@ func TestChallenge_Solve(test *testing.T) {
 				}(),
 				params: SolveParams{},
 			},
-			want:    Solution{},
-			wantErr: assert.Error,
+			want: Solution{},
+			wantErr: func(test assert.TestingT, err error, msgAndArgs ...any) bool {
+				return assert.ErrorIs(test, err, powErrors.ErrTaskInterruption)
+			},
 		},
 		{
 			name: "error/maximal attempt count is exceeded",
@@ -725,8 +760,10 @@ func TestChallenge_Solve(test *testing.T) {
 					MaxAttemptCount: mo.Some(23),
 				},
 			},
-			want:    Solution{},
-			wantErr: assert.Error,
+			want: Solution{},
+			wantErr: func(test assert.TestingT, err error, msgAndArgs ...any) bool {
+				return assert.ErrorIs(test, err, powErrors.ErrTaskInterruption)
+			},
 		},
 		{
 			name: "error/unable to execute the hash data layout",
