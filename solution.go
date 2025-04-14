@@ -28,15 +28,9 @@ func (entity Solution) HashSum() mo.Option[powValueTypes.HashSum] {
 }
 
 func (entity Solution) Verify() error {
-	targetBitIndex, err := entity.challenge.TargetBitIndex()
-	if err != nil {
-		return fmt.Errorf("unable to get the target bit index: %w", err)
-	}
-
 	hashData, err := entity.challenge.hashDataLayout.Execute(ChallengeHashData{
-		Challenge:      entity.challenge,
-		TargetBitIndex: targetBitIndex,
-		Nonce:          entity.nonce,
+		Challenge: entity.challenge,
+		Nonce:     entity.nonce,
 	})
 	if err != nil {
 		return fmt.Errorf("unable to execute the hash data layout: %w", err)
@@ -47,6 +41,11 @@ func (entity Solution) Verify() error {
 	expectedHashSum, isPresent := entity.hashSum.Get()
 	if isPresent && !bytes.Equal(hashSum.ToBytes(), expectedHashSum.ToBytes()) {
 		return errors.New("hash sum doesn't match the expected one")
+	}
+
+	targetBitIndex, err := entity.challenge.TargetBitIndex()
+	if err != nil {
+		return fmt.Errorf("unable to get the target bit index: %w", err)
 	}
 
 	target := makeTarget(targetBitIndex)
