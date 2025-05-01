@@ -5,6 +5,7 @@ import (
 	"hash"
 	"testing"
 
+	"github.com/samber/mo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,9 +37,53 @@ func TestNewHash(test *testing.T) {
 	}
 }
 
+func TestNewHashWithName(test *testing.T) {
+	type args struct {
+		rawValue hash.Hash
+		name     string
+	}
+
+	for _, data := range []struct {
+		name    string
+		args    args
+		want    Hash
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "success",
+			args: args{
+				rawValue: sha256.New(),
+				name:     "SHA-256",
+			},
+			want: Hash{
+				rawValue: sha256.New(),
+				name:     mo.Some("SHA-256"),
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "error",
+			args: args{
+				rawValue: sha256.New(),
+				name:     "",
+			},
+			want:    Hash{},
+			wantErr: assert.Error,
+		},
+	} {
+		test.Run(data.name, func(test *testing.T) {
+			got, err := NewHashWithName(data.args.rawValue, data.args.name)
+
+			assert.Equal(test, data.want, got)
+			data.wantErr(test, err)
+		})
+	}
+}
+
 func TestHash_Name(test *testing.T) {
 	type fields struct {
 		rawValue hash.Hash
+		name     mo.Option[string]
 	}
 
 	for _, data := range []struct {
@@ -47,9 +92,18 @@ func TestHash_Name(test *testing.T) {
 		want   string
 	}{
 		{
-			name: "success",
+			name: "success/with a name",
 			fields: fields{
 				rawValue: sha256.New(),
+				name:     mo.Some("SHA-256"),
+			},
+			want: "SHA-256",
+		},
+		{
+			name: "success/without a name",
+			fields: fields{
+				rawValue: sha256.New(),
+				name:     mo.None[string](),
 			},
 			want: "*sha256.digest",
 		},
@@ -57,6 +111,7 @@ func TestHash_Name(test *testing.T) {
 		test.Run(data.name, func(test *testing.T) {
 			value := Hash{
 				rawValue: data.fields.rawValue,
+				name:     data.fields.name,
 			}
 			got := value.Name()
 

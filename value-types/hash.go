@@ -1,8 +1,11 @@
 package powValueTypes
 
 import (
+	"errors"
 	"hash"
 	"reflect"
+
+	"github.com/samber/mo"
 )
 
 const (
@@ -11,6 +14,7 @@ const (
 
 type Hash struct {
 	rawValue hash.Hash
+	name     mo.Option[string]
 }
 
 func NewHash(rawValue hash.Hash) Hash {
@@ -19,7 +23,24 @@ func NewHash(rawValue hash.Hash) Hash {
 	}
 }
 
+func NewHashWithName(rawValue hash.Hash, name string) (Hash, error) {
+	if name == "" {
+		return Hash{}, errors.New("hash name cannot be empty")
+	}
+
+	value := Hash{
+		rawValue: rawValue,
+		name:     mo.Some(name),
+	}
+	return value, nil
+}
+
 func (value Hash) Name() string {
+	name, isPresent := value.name.Get()
+	if isPresent {
+		return name
+	}
+
 	// don't use `reflect.Type.Name()`, as implementations of `hash.Hash`
 	// are most often private
 	return reflect.TypeOf(value.rawValue).String()
