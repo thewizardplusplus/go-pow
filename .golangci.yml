@@ -16,6 +16,9 @@ linters:
       - linters:
           - lll
         source: "^//go:generate "
+      - linters:
+          - lll
+        source: "^\t// challenge:"
 formatters:
   exclusions:
     generated: lax

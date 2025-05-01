@@ -1,36 +1,24 @@
-# go-pow
-
-[![GoDoc](https://godoc.org/github.com/thewizardplusplus/go-pow?status.svg)](https://godoc.org/github.com/thewizardplusplus/go-pow)
-[![Go Report Card](https://goreportcard.com/badge/github.com/thewizardplusplus/go-pow)](https://goreportcard.com/report/github.com/thewizardplusplus/go-pow)
-[![lint](https://github.com/thewizardplusplus/go-pow/actions/workflows/lint.yaml/badge.svg)](https://github.com/thewizardplusplus/go-pow/actions/workflows/lint.yaml)
-[![test](https://github.com/thewizardplusplus/go-pow/actions/workflows/test.yaml/badge.svg)](https://github.com/thewizardplusplus/go-pow/actions/workflows/test.yaml)
-[![codecov](https://codecov.io/gh/thewizardplusplus/go-pow/graph/badge.svg?token=m3HjBxbUlg)](https://codecov.io/gh/thewizardplusplus/go-pow)
-
-## Installation
-
-```
-$ go get github.com/thewizardplusplus/go-pow
-```
-
-## Examples
-
-Minimal (also see in the playground: https://go.dev/play/p/wsUGURDKFvb):
-
-```go
-package main
+package pow_test
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"log"
+	"math/big"
+	"net/url"
 	"strconv"
+	"time"
 
+	"github.com/samber/mo"
 	pow "github.com/thewizardplusplus/go-pow"
+	powErrors "github.com/thewizardplusplus/go-pow/errors"
 	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
 )
 
-func main() {
+func Example_minimal() {
 	leadingZeroBitCount, err := powValueTypes.NewLeadingZeroBitCount(5)
 	if err != nil {
 		log.Fatalf("unable to construct the leading zero bit count: %s", err)
@@ -82,30 +70,8 @@ func main() {
 	// hash sum: 005d372c56e6c6b52ad4a8325654692ec9aa3af5f73021748bc3fdb124ae9b20
 	// verification: OK
 }
-```
 
-Full (also see in the playground: https://go.dev/play/p/_3kPX0VtHFA):
-
-```go
-package main
-
-import (
-	"bytes"
-	"context"
-	"crypto/sha256"
-	"fmt"
-	"log"
-	"math/big"
-	"net/url"
-	"strconv"
-	"time"
-
-	"github.com/samber/mo"
-	pow "github.com/thewizardplusplus/go-pow"
-	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
-)
-
-func main() {
+func Example_full() {
 	leadingZeroBitCount, err := powValueTypes.NewLeadingZeroBitCount(5)
 	if err != nil {
 		log.Fatalf("unable to construct the leading zero bit count: %s", err)
@@ -193,28 +159,8 @@ func main() {
 	// hash sum: 060056e78e0b90e48c765d4f64c0f63d5926e28a56f3cd229bdc78225f91cd51
 	// verification: OK
 }
-```
 
-With interruption (also see in the playground: https://go.dev/play/p/xT2G05H8VqN):
-
-```go
-package main
-
-import (
-	"context"
-	"crypto/sha256"
-	"errors"
-	"fmt"
-	"log"
-	"strconv"
-
-	"github.com/samber/mo"
-	pow "github.com/thewizardplusplus/go-pow"
-	powErrors "github.com/thewizardplusplus/go-pow/errors"
-	powValueTypes "github.com/thewizardplusplus/go-pow/value-types"
-)
-
-func main() {
+func Example_withInterruption() {
 	tooBigLeadingZeroBitCount, err := powValueTypes.NewLeadingZeroBitCount(100)
 	if err != nil {
 		log.Fatalf("unable to construct the leading zero bit count: %s", err)
@@ -262,10 +208,3 @@ func main() {
 	// challenge: [100 dummy SHA-256 {{.Challenge.LeadingZeroBitCount.ToInt}}:{{.Challenge.SerializedPayload.ToString}}:{{.Nonce.ToString}}]
 	// solving: interrupted
 }
-```
-
-## License
-
-The MIT License (MIT)
-
-Copyright &copy; 2025 thewizardplusplus
