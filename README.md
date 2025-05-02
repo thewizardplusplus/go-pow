@@ -6,6 +6,41 @@
 [![test](https://github.com/thewizardplusplus/go-pow/actions/workflows/test.yaml/badge.svg)](https://github.com/thewizardplusplus/go-pow/actions/workflows/test.yaml)
 [![codecov](https://codecov.io/gh/thewizardplusplus/go-pow/graph/badge.svg?token=m3HjBxbUlg)](https://codecov.io/gh/thewizardplusplus/go-pow)
 
+A library that implements a [proof-of-work](https://en.wikipedia.org/wiki/Proof_of_work) system with customizable challenges.
+
+## Features
+
+- use of patterns:
+  - implementation based on [Domain-Driven Design (DDD)](https://en.wikipedia.org/wiki/Domain-driven_design) principles;
+  - usage of the [Builder pattern](https://en.wikipedia.org/wiki/Builder_pattern) to ensure entity invariants;
+  - definition of entities with explicitly declared [value types](https://en.wikipedia.org/wiki/Value_object) for each field;
+- definition of challenges with the following fields:
+  - `leading zero bit count` &mdash; the required number of leading zero bits in the resulting hash;
+  - `target bit index` &mdash; a bit index used in determining the solution’s difficulty:
+    - it refers to the bit position such that the resulting hash will be less than the number where that bit is set (for example, with a 256-bit hash and a requirement of 6 leading zeros, we would set the 250th bit);
+    - only one of `leading zero bit count` or `target bit index` should be set explicitly &mdash; the other is derived from it;
+  - `created at` _(optional)_ &mdash; the timestamp when the challenge was created;
+  - `TTL` _(optional)_ &mdash; the duration after which the challenge expires:
+    - `created at` and `TTL` must either be both specified or both omitted;
+  - `resource` _(optional)_ &mdash; the resource associated with the challenge, typically for scoping:
+    - based on the [`net/url.URL`](https://pkg.go.dev/net/url@go1.23.0#URL) type, but any [Uniform Resource Identifier (URI)](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier) format is allowed;
+  - `serialized payload` &mdash; the raw data to be included in the hash:
+    - must be pre-serialized to a string; the library does not handle serialization itself;
+  - `hash` &mdash; the hash function used to verify the solution:
+    - based on the [`hash.Hash`](https://pkg.go.dev/hash@go1.23.0#Hash) interface;
+  - `hash data layout` &mdash; the structure of the data used during hashing:
+    - based on the [`text/template.Template`](https://pkg.go.dev/text/template@go1.23.0#Template) type;
+    - defines which fields of the challenge will be hashed and in what order, giving full control over the hash input structure;
+- generation of solutions that meet specified challenge criteria:
+  - starting nonce value:
+    - it can be zero;
+    - it can be randomly selected within a given range;
+  - the generation process can be interrupted via:
+    - [context](https://pkg.go.dev/context@go1.23.0#Context) cancellation;
+    - an attempt limit;
+- validation of solutions against their corresponding challenges;
+- sentinel errors provided through a dedicated `errors` subpackage.
+
 ## Installation
 
 ```
